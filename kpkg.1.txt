@@ -1,0 +1,37 @@
+/////
+vim:set ts=4 sw=4 tw=82 noet:
+/////
+kpkg (1)
+========
+
+Name
+----
+kpkg - KnightOS packaging tool
+
+Synopsis
+--------
+'kpkg' _config_ _model_ _output_
+
+Description
+-----------
+
+_config_ is a file explaining details about the package, such as name,
+description, version, dependencies, etc. See *Configuration* below.
+
+_model_ is a directory that represents the package model. It should be the root of
+the filesystem as it would appear if your package was the only thing installed on
+the system (sans kpkg metadata).
+
+Examples
+--------
+
+kpg castle.config ./temp castle.kpg::
+	Packages _castle.kpg_ with the contents of _./temp_ and the configuration
+	specified by _castle.config_.
+
+Authors
+-------
+
+Maintained by Drew DeVault <sir@cmpwn.com>, who is assisted by other open
+source contributors. For more information about kpkg development, see
+<https://github.com/KnightOS/kpkg>.

@@ -10,7 +10,7 @@ kpack - KnightOS cross packaging tool
 
 Synopsis
 --------
-'kpack' [options] _package _model_
+'kpack' [options] _package_ _model_
 
 Description
 -----------

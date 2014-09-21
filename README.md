@@ -1,3 +1,161 @@
 # kpack
 
 A tool to create or extract KnightOS packages on POSIX systems (and Windows).
+
+# KnightOS Package Format
+
+KnightOS packages contain a number of files and the paths they should be extracted to, as well
+as some metadata. This document uses a similar format to the gzip specification. That is:
+
+In the diagrams below, a box like this:
+
++---+
+|   | <-- the vertical bars might be missing
++---+
+
+represents one byte; a box like this:
+
++==============+
+|              |
++==============+
+
+represents a variable number of bytes. 
+
+## Format Specification
+
+The file begins with a short header, containing a magic number and the format version:
+
++======+---------+
+| KPKG | Version |
++======+---------+
+
+"KPKG" is ASCII-encoded. The version is an unsigned 8-bit integer. The current version is 0.
+
+This is followed by the metadata section. It is a simple key-value pair system, with unsigned
+8-bit integer keys. Each key is followed by the length of the value, and then some key-specific
+value format follows for VLEN bytes.
+
++-----+-----+------+=======+
+| LEN | Key | VLEN | Value | (more-->)
++-----+-----+------+=======+
+
+The key/value pairs are repeated LEN times. Keys from 0x00-0x7F (inclusive) are reserved for
+future or current use, and keys from 0x80-0xFF are available for arbitrary use.
+
+### Formally Specified Keys
+
+The following keys are currently included in this specification:
+
+- KEY_PKG_NAME (0x00): An ASCII string with the name of the package (i.e. "corelib")
+- KEY_PKG_REPO (0x01): An ASCII string with the name of the package repository (i.e. "core")
+- KEY_PKG_DESCRIPTION (0x02): An ASCII string with the user-friendly package description
+- KEY_PKG_DEPS (0x03): Lists packages that this package depends on:
+  
+  +-----+-----+=========+------+======+
+  | LEN | INC | VERSION | NLEN | NAME | (more-->)
+  +-----+-----+=========+------+======+
+
+  LEN is the total number of packages that this package depends on. The packager may choose
+  to include additional packages in this same package file, to fulfill its dependencies. If
+  the listed dependency is included in this package file, INC will be 1, or otherwise 0. Each
+  depdency is then listed with its full name (i.e. "core/corelib"), prefixed by the length
+  NLEN. VERSION is the minimum version of this package required, as described below:
+
+- KEY_PKG_VERSION (0x04): The package version takes the form of:
+  
+  +-------+-------+-------+
+  | MAJOR | MINOR | PATCH |
+  +-------+-------+-------+
+  
+  Packages are encouraged to use semantic versioning, by incrementing MINOR when new features
+  are added, MAJOR when breaking changes are introduced, and PATCH for simple fixes.
+
+- KEY_PKG_AUTHOR (0x05): The author of this software, as an ASCII string.
+- KEY_PKG_MAINTAINER (0x06): The author of the package (may be different from the author of the
+  software), as an ASCII string.
+- KEY_PKG_COPYRIGHT (0x07): The license name or copyright, as an ASCII string. Packagers are
+  encouraged to include the full license text as a file and install it to
+  /share/licenses/<package name> (see "Licenses" below).
+- KEY_INFO_URL (0x08): The fully qualified URL where information about this package may be
+  obtained, usually the source code or documentation.
+
+Combining KEY_PKG_NAME and KEY_PKG_REPO gives you the full name of the package
+(i.e. "core/corelib").
+
+## Package Hooks
+
+Packages may contain arbitrary code to be executed during install and removal. Immediately
+following the nested packages is a list of these hooks. They take the following format:
+
++------+=====+============+
+| HOOK | LEN | EXECUTABLE | (more-->)
++------+=====+============+
+
+EXECUTABLE is LEN bytes of executable z80 code, up to 0x500 bytes. This code will be loaded into
+memory and started as a new thread during the installation. The following hooks are available:
+
+- HOOK_BEFORE_INSTALL (0x01): Runs before the installation begins.
+- HOOK_AFTER_INSTALL (0x02): Runs when installation is complete.
+- HOOK_BEFORE_REMOVAL (0x03): Runs before removing the package.
+- HOOK_AFTER_REMOVAL (0x04): Runs after removing the package.
+
+A 0x00 as HOOK value traduces the end of the hooks list.
+
+## Package Files
+
+Finally, a list of files included in this package follows. First, a LEN byte with the total number
+of files. Then, a number of file entries follows:
+
++------+======+-------+======+======+======+---------+==========+
+| PLEN | PATH | CTYPE | ULEN | FLEN | FILE | SUMTYPE | CHECKSUM | (more-->)
++------+======+-------+======+======+======+---------+==========+
+
+The path is specified first, prefixed by the length of the path. This is the full path the file
+should be written to on extraction.
+
+CTYPE specifies the compression algorithm used. Currently implemented algorithms include:
+
+- COMPRESSION_UNCOMPRESSED (0x00): This file is entirely uncompressed.
+- COMPRESSION_RLE (0x01): This file uses run-length-encoding, KnightOS format
+- COMPRESSION_PUCRUNCH (0x02): This file uses pucrunch
+
+The uncompressed length of the file follows (as a 24-bit unsigned integer, little endian), and then
+the length of the compressed data (same integer format), and the data itself. The type of checksum
+used is next:
+
+- SUM_NOSUM (0x00): There is no checksum, and the CHECKSUM is 0 bytes.
+- SUM_CRC16 (0x01): The checksum is a CRC-16 of this file.
+- SUM_SHA1 (0x02): The checksum is the SHA-1 digest of this file.
+- SUM_MD5 (0x03): The checksum is the MD5 digest of this file.
+
+This is the last section included in the package.
+
+## Packages after install
+
+After install, a package stub is created in /var/packages/stubs/ that takes this format:
+
+1. The metadata from the original package
+2. The install hooks
+3. The file list, less the file contents
+
+The information in the stub is sufficient to uninstall packages.
+
+## Licenses
+
+When licensing your package, please include your license in the package as
+/share/licenses/common/LICENSENAME. A few common license names are listed here:
+
+- MIT_X11
+- MS_PL
+- WTFPL
+- GPLv1
+- GPLv2
+- GPLv3
+- APACHE
+- PROPRIETARY_DO_NOT_DISTRIBUTE
+- PROPRIETARY_DISTRIBUTABLE
+
+If you use one of the listed licenses, please name your license file as listed above and populate
+it with project-ambiguous information (see templates online at <http://knightos.org>). In your
+package, please include a symlink from /share/licenses/packagename to the license in the common
+directory.

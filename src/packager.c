@@ -4,7 +4,7 @@ void initRuntime()
 {
 	packager.config = NULL;
 	packager.configName = NULL;
-	packager.pack = true;
+	packager.pack = 1;
 	packager.rootName = NULL;
 	packager.name = NULL;
 	packager.version = 0;
@@ -37,7 +37,7 @@ int parse_args(int argc, char *argv[])
 		}
 		else if(match_option("-e", "--extract"))
 		{
-			packager.pack = false;
+			packager.pack = 0;
 		}
 		else if(match_option("-s", "--sum"))
 		{

@@ -5,13 +5,6 @@
 #include <ctype.h>
 #include <string.h>
 
-typedef int bool;
-
-enum {
-	false,
-	true
-};
-
 typedef struct {
 	uint8_t major;
 	uint8_t minor;
@@ -19,7 +12,7 @@ typedef struct {
 } versionData;
 
 typedef struct {
-	bool included;
+	int included;
 	versionData version;
 	uint8_t nameLength;
 	char* name;
@@ -46,7 +39,7 @@ struct {
 	// Runtime
 	FILE* config;
 	char* configName;
-	bool pack;
+	int pack;
 	char* rootName;
 	//
 	// Package

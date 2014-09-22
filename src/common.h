@@ -48,19 +48,19 @@ struct {
 	uint8_t version;
 	// Metadata
 	uint8_t mdlen;
-	metadata* *md;
+	metadata **md;
 	// Files
 	uint8_t compressionType;
 	uint8_t sumType;
 	uint8_t flen;
-	filedata* *files;
+	filedata **files;
 } packager;
 
 struct {
 	uint8_t mdlen;
-	metadata* *md;
+	metadata **md;
 	// This doesn't include the files' contents
-	filedata* *files;
+	filedata **files;
 } packageStub;
 
 enum {

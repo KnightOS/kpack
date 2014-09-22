@@ -6,7 +6,7 @@ add_definitions("-Wall")
 
 add_executable(kpack
     src/main.c
-	src/packager.c
+    src/packager.c
 )
 
 install(PROGRAMS bin/kpack

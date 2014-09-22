@@ -78,25 +78,6 @@ The following keys are currently included in this specification:
 Combining KEY_PKG_NAME and KEY_PKG_REPO gives you the full name of the package
 (i.e. "core/corelib").
 
-## Package Hooks
-
-Packages may contain arbitrary code to be executed during install and removal. Immediately
-following the nested packages is a list of these hooks. They take the following format:
-
-+------+=====+============+
-| HOOK | LEN | EXECUTABLE | (more-->)
-+------+=====+============+
-
-EXECUTABLE is LEN bytes of executable z80 code, up to 0x500 bytes. This code will be loaded into
-memory and started as a new thread during the installation. The following hooks are available:
-
-- HOOK_BEFORE_INSTALL (0x01): Runs before the installation begins.
-- HOOK_AFTER_INSTALL (0x02): Runs when installation is complete.
-- HOOK_BEFORE_REMOVAL (0x03): Runs before removing the package.
-- HOOK_AFTER_REMOVAL (0x04): Runs after removing the package.
-
-A 0x00 as HOOK value traduces the end of the hooks list.
-
 ## Package Files
 
 Finally, a list of files included in this package follows. First, a LEN byte with the total number
@@ -131,8 +112,7 @@ This is the last section included in the package.
 After install, a package stub is created in /var/packages/stubs/ that takes this format:
 
 1. The metadata from the original package
-2. The install hooks
-3. The file list, less the file contents
+2. The file list, less the file contents
 
 The information in the stub is sufficient to uninstall packages.
 

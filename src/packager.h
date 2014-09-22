@@ -3,5 +3,6 @@
 
 extern void initRuntime();
 extern int parse_args(int argc, char **argv);
+extern int parse_metadata();
 
 #endif

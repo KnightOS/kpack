@@ -17,12 +17,13 @@ void displayUsage()
 		"\t-s|--sum\n"
 		"\t\tSpecifies a checksum algorithm to use, among 'crc16', 'sha1', 'md5' and 'none', defaulting to 'crc16'\n"
 		"\t-x|--compressor\n"
-		"\t\tSpecifies the compressor to use among 'pucrunch', 'rle' and 'none', defaulting to 'none'\n"
+		"\t\tSpecifies the compressor to use among 'pucrunch', 'rle' and 'none', defaulting to 'pucrunch'\n"
 	);
 }
 
 int main(int argc, char **argv)
 {
+	FILE *output;
 	initRuntime();
 	
 	if(parse_args(argc, argv)) {
@@ -30,10 +31,63 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	// TODO
-	// Well, everything
+	printf("Argument parsing successful.\n");
 	
-	fclose(packager.config);
+	// Pack things
+	if(packager.pack) {
+		if(parse_metadata()) {
+			printf("Aborting operation.\n");
+			if(packager.pkgname) {
+				free(packager.pkgname);
+			}
+			if(packager.repo) {
+				free(packager.repo);
+			}
+			fclose(packager.config);
+			return 1;
+		}
+		
+		printf("Metadata parsing successful.\nPackaging into file '%s'\n", packager.filename);
+		
+		output = fopen(packager.filename, "wb");
+		
+		// See doc/package_format for information on package format
+		fputs("KPKG", output);
+		fputc(KPKG_FORMAT_VERSION, output);
+		
+		// Write metadata
+		fputc(packager.mdlen, output);
+		// Package name
+		fputc(KEY_PKG_NAME, output);
+		fputc(strlen(packager.pkgname), output);
+		fputs(packager.pkgname, output);
+		// Package repo
+		fputc(KEY_PKG_REPO, output);
+		fputc(strlen(packager.repo), output);
+		fputs(packager.repo, output);
+		// Package version
+		fputc(KEY_PKG_VERSION, output);
+		fputc(3, output);
+		fputc(packager.version.major, output);
+		fputc(packager.version.minor, output);
+		fputc(packager.version.patch, output);
+		
+		// Write files
+		//
+		// TODO
+		//
+		
+		free(packager.pkgname);
+		free(packager.repo);
+		
+		fclose(output);
+		
+		fclose(packager.config);
+		
+		printf("Packing done !\n");
+	} else {
+		printf("Unpacking not supported yet.\n");
+	}
 	
 	return 0;
 }

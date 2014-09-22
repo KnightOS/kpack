@@ -2,8 +2,12 @@
 #define INC_COM
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
+// This file is only valid for the revision 0 of the KPKG format
+#define KPKG_FORMAT_VERSION 0
 
 typedef struct {
 	uint8_t major;
@@ -40,12 +44,14 @@ struct {
 	FILE *config;
 	char *configName;
 	int pack;
+	char *filename;
 	char *rootName;
 	//
 	// Package
 	//
-	char *name;
-	uint8_t version;
+	char *pkgname;
+	char *repo;
+	versionData version;
 	// Metadata
 	uint8_t mdlen;
 	metadata **md;

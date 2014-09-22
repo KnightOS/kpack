@@ -5,7 +5,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 add_definitions("-Wall")
 
 add_executable(kpack
-    main.c
+    src/main.c
+	src/packager.c
 )
 
 install(PROGRAMS bin/kpack

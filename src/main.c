@@ -1,8 +1,7 @@
 #include "common.h"
 #include "packager.h"
 
-void displayUsage()
-{
+void displayUsage() {
 	printf(
 		"KnightOS package manager - packs or unpacks a KnightOS package from or into a directory model.\n"
 		"\n"
@@ -21,12 +20,11 @@ void displayUsage()
 	);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	FILE *output;
 	initRuntime();
 	
-	if(parse_args(argc, argv)) {
+	if (parse_args(argc, argv)) {
 		printf("Aborting operation.\n");
 		return 1;
 	}
@@ -34,13 +32,13 @@ int main(int argc, char **argv)
 	printf("Argument parsing successful.\n");
 	
 	// Pack things
-	if(packager.pack) {
-		if(parse_metadata()) {
+	if (packager.pack) {
+		if (parse_metadata()) {
 			printf("Aborting operation.\n");
-			if(packager.pkgname) {
+			if (packager.pkgname) {
 				free(packager.pkgname);
 			}
-			if(packager.repo) {
+			if (packager.repo) {
 				free(packager.repo);
 			}
 			fclose(packager.config);

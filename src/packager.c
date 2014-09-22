@@ -43,13 +43,21 @@ int parse_args(int argc, char *argv[])
 		{
 			i++;
 			if(strcmp(argv[i], "crc16") == 0)
+			{
 				packager.sumType = SUM_CRC16;
+			}
 			else if(strcmp(argv[i], "sha1") == 0)
+			{
 				packager.sumType = SUM_SHA1;
+			}
 			else if(strcmp(argv[i], "md5") == 0)
+			{
 				packager.sumType = SUM_MD5;
+			}
 			else if(strcmp(argv[i], "none") == 0)
+			{
 				packager.sumType = SUM_NONE;
+			}
 			else
 			{
 				printf("Invalid checksum type. Valid choices are 'crc16', 'sha1', 'md5' or 'none'.\n");
@@ -60,11 +68,17 @@ int parse_args(int argc, char *argv[])
 		{
 			i++;
 			if(strcmp(argv[i], "pucrunch") == 0)
+			{
 				packager.compressionType = COMPRESSION_PUCRUNCH;
+			}
 			else if(strcmp(argv[i], "rle") == 0)
+			{
 				packager.compressionType = COMPRESSION_RLE;
+			}
 			else if(strcmp(argv[i], "none") == 0)
+			{
 				packager.compressionType = COMPRESSION_NONE;
+			}
 			else
 			{
 				printf("Invalid compression type. Valid choices are 'pucrunch', 'rle' or 'none'.\n");
@@ -74,11 +88,15 @@ int parse_args(int argc, char *argv[])
 		else
 		{
 			if(!packager.name)
+			{
 				// That's the package's name
 				packager.name = argv[i];
+			}
 			else if(!packager.rootName)
+			{
 				// That's the model
 				packager.rootName = argv[i];
+			}
 			else
 			{
 				// Hum ...
@@ -99,7 +117,9 @@ int parse_args(int argc, char *argv[])
 	}
 	
 	if(!packager.configName)
+	{
 		packager.configName = "package.config";
+	}
 		
 	packager.config = fopen(packager.configName, "r");
 	

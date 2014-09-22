@@ -19,11 +19,11 @@ void displayUsage()
 	);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
 	initRuntime();
-	if(parse_args(argc, argv))
-	{
+	
+	if(parse_args(argc, argv)) {
 		printf("Aborting operation.\n");
 		return 1;
 	}

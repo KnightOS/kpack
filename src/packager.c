@@ -7,14 +7,13 @@ void initRuntime() {
 	packager.filename = NULL;
 	packager.rootName = NULL;
 	packager.pkgname = NULL;
+	packager.output = NULL;
 	packager.repo = NULL;
 	packager.version.major = packager.version.minor = packager.version.patch = -1;
 	packager.mdlen = 0;
-	packager.md = NULL;
 	packager.compressionType = COMPRESSION_PUCRUNCH;
 	packager.sumType = SUM_CRC16;
 	packager.flen = 0;
-	packager.files = NULL;
 }
 
 #define match_option(short, opt) (strcmp(opt, argv[i]) == 0 || strcmp(short, argv[i]) == 0)
@@ -198,4 +197,130 @@ int parse_metadata() {
 	}
 	
 	return returnV;
+}
+
+void writeFileToPackage(char *f) {
+	// Don't include the model's root name
+	int size, c;
+	char *filename = strchr(f, '/');
+	FILE *in = fopen(f, "rb");
+	int plen = strlen(filename);
+	fputc(plen, packager.output);
+	fputs(filename, packager.output);
+	fputc(packager.compressionType, packager.output);
+	fseek(in, 0, SEEK_END);
+	size = ftell(in);
+	fseek(in, 0, SEEK_SET);
+	// 24-bits size
+	fputc(size & 0xff, packager.output);
+	fputc((size >> 8) & 0xff, packager.output);
+	fputc((size >> 16) & 0xff, packager.output);
+	if (packager.compressionType == COMPRESSION_RLE) {
+		//
+		// TODO
+		//
+		// RLE compression
+		// put compressed size in variable 'size'
+	} else if (packager.compressionType == COMPRESSION_PUCRUNCH) {
+		//
+		// TODO
+		//
+		// RLE compression
+		// put compressed size in variable 'size'
+	}
+	// 24-bits size
+	fputc(size & 0xff, packager.output);
+	fputc((size >> 8) & 0xff, packager.output);
+	fputc((size >> 16) & 0xff, packager.output);
+	
+	while ((c = getc(in)) != EOF) {
+		fputc(c, packager.output);
+	}
+	
+	if (packager.sumType == SUM_NONE) {
+		fputc(SUM_NONE, packager.output);
+	} else if (packager.sumType == SUM_CRC16) {
+		fputc(SUM_CRC16, packager.output);
+		//
+		// TODO
+		//
+		// CRC16 checksum
+		// directly write the thing
+	} else if (packager.sumType == SUM_SHA1) {
+		fputc(SUM_SHA1, packager.output);
+		//
+		// TODO
+		//
+		// SHA1 checksum
+		// directly write the thing
+	} else if (packager.sumType == SUM_MD5) {
+		fputc(SUM_MD5, packager.output);
+		//
+		// TODO
+		//
+		// MD5 checksum
+		// directly write the thing
+	}
+}
+
+void printSpaces(int j) {
+	int i;
+	for(i = 0; i < j; i++) {
+		printf("--");
+	}
+}
+
+void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry, int indent) {
+	DIR *rroot;
+	struct dirent *rentry;
+	char rrootName[1024];
+	char rfilename[1024];
+	
+	while (currentEntry) {
+		if (currentEntry->d_type == DT_REG) {
+			// found a file, write it to output
+			printSpaces(indent);
+			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
+			printf("Adding file %s to package ...\n", rfilename);
+			writeFileToPackage(rfilename);
+			currentEntry = readdir(root);
+			
+		} else if (currentEntry->d_type == DT_DIR) {
+			// found a directory, recursively explore it
+			// ... except if it's . or ..
+			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
+				sprintf(rrootName, "%s/%s", rootName, currentEntry->d_name);
+				printSpaces(indent);
+				printf("Entering directory %s.\n", rrootName);
+				rroot = opendir(rrootName);
+				if(!rroot) {
+					printSpaces(indent);
+					printf("Couldn't open dir %s\n", rrootName);
+				} else {
+					rentry = readdir(rroot);
+					if(rentry) {
+						writeModelRecursive(rroot, rrootName, rentry, indent + 1);
+					}
+					closedir(rroot);
+				}
+				currentEntry = readdir(root);
+			} else {
+				// in that case, skip it
+				currentEntry = readdir(root);
+			}
+		}
+	}
+	printSpaces(indent);
+	printf("No more files in directory %s.\n\n", rootName);
+}
+
+void writeModel(DIR *root, char *rootName) {
+	struct dirent *currentEntry;
+	
+	currentEntry = readdir(root);
+	if(currentEntry) {	
+		writeModelRecursive(root, rootName, currentEntry, 0);
+	} else {
+		printf("Model %s is empty !\nAborting operation.\n", rootName);
+	}
 }

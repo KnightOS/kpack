@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <dirent.h>
 
 // This file is only valid for the revision 0 of the KPKG format
 #define KPKG_FORMAT_VERSION 0
@@ -22,23 +23,6 @@ typedef struct {
 	char *name;
 } packageDependency;
 
-typedef struct {
-	uint8_t key;
-	uint8_t vlen;
-	void *value;
-} metadata;
-
-typedef struct {
-	uint8_t pathLength;
-	char *path;
-	// Only 24 bits are used
-	uint32_t uncompressedLength;
-	uint32_t compressedLength;
-	FILE *file;
-	char *sumString;
-	uint16_t crc16;
-} filedata;
-
 struct {
 	// Runtime
 	FILE *config;
@@ -46,6 +30,7 @@ struct {
 	int pack;
 	char *filename;
 	char *rootName;
+	FILE *output;
 	//
 	// Package
 	//
@@ -54,20 +39,11 @@ struct {
 	versionData version;
 	// Metadata
 	uint8_t mdlen;
-	metadata **md;
 	// Files
 	uint8_t compressionType;
 	uint8_t sumType;
 	uint8_t flen;
-	filedata **files;
 } packager;
-
-struct {
-	uint8_t mdlen;
-	metadata **md;
-	// This doesn't include the files' contents
-	filedata **files;
-} packageStub;
 
 enum {
 	KEY_PKG_NAME,

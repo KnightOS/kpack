@@ -21,7 +21,9 @@ void displayUsage() {
 }
 
 int main(int argc, char **argv) {
-	FILE *output;
+	// File parsing
+	DIR *rootDir;
+	
 	initRuntime();
 	
 	if (parse_args(argc, argv)) {
@@ -29,7 +31,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	
-	printf("Argument parsing successful.\n");
+	printf("\nArgument parsing successful.\n\n");
 	
 	// Pack things
 	if (packager.pack) {
@@ -45,40 +47,44 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		
-		printf("Metadata parsing successful.\nPackaging into file '%s'\n", packager.filename);
+		printf("Metadata parsing successful.\nPackaging into file '%s'\n\n", packager.filename);
 		
-		output = fopen(packager.filename, "wb");
+		packager.output = fopen(packager.filename, "wb");
 		
 		// See doc/package_format for information on package format
-		fputs("KPKG", output);
-		fputc(KPKG_FORMAT_VERSION, output);
+		fputs("KPKG", packager.output);
+		fputc(KPKG_FORMAT_VERSION, packager.output);
 		
 		// Write metadata
-		fputc(packager.mdlen, output);
+		fputc(packager.mdlen, packager.output);
 		// Package name
-		fputc(KEY_PKG_NAME, output);
-		fputc(strlen(packager.pkgname), output);
-		fputs(packager.pkgname, output);
+		fputc(KEY_PKG_NAME, packager.output);
+		fputc(strlen(packager.pkgname), packager.output);
+		fputs(packager.pkgname, packager.output);
 		// Package repo
-		fputc(KEY_PKG_REPO, output);
-		fputc(strlen(packager.repo), output);
-		fputs(packager.repo, output);
+		fputc(KEY_PKG_REPO, packager.output);
+		fputc(strlen(packager.repo), packager.output);
+		fputs(packager.repo, packager.output);
 		// Package version
-		fputc(KEY_PKG_VERSION, output);
-		fputc(3, output);
-		fputc(packager.version.major, output);
-		fputc(packager.version.minor, output);
-		fputc(packager.version.patch, output);
+		fputc(KEY_PKG_VERSION, packager.output);
+		fputc(3, packager.output);
+		fputc(packager.version.major, packager.output);
+		fputc(packager.version.minor, packager.output);
+		fputc(packager.version.patch, packager.output);
 		
 		// Write files
-		//
-		// TODO
-		//
+		rootDir = opendir(packager.rootName);
+		if(!rootDir) {
+			printf("Couldn't open directory %s.\nAborting operation.\n", packager.rootName);
+		} else {
+			writeModel(rootDir, packager.rootName);
+			closedir(rootDir);
+		}
 		
 		free(packager.pkgname);
 		free(packager.repo);
 		
-		fclose(output);
+		fclose(packager.output);
 		
 		fclose(packager.config);
 		

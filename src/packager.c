@@ -126,7 +126,7 @@ int config_key_match(char *s, char *k) {
 		s++;
 		k++;
 	}
-	return !*k;
+	return !*k && *s == '=';
 }
 
 char *config_get_string(char *s) {

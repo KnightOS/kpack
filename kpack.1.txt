@@ -16,7 +16,7 @@ Description
 -----------
 
 Packages (or unpackages) KnightOS package archives from files on disk. You must
-include a package config (_pkgconfig.ini_ by default) which will be read for
+include a package config (_package.config_ by default) which will be read for
 metadata. The _model_ directory is the root of the filesystem the package files
 should be extracted to.
 
@@ -47,7 +47,7 @@ Examples
 --------
 
 kpack castle.kpa ./temp::
-	Reads metadata from _pkgconfig.ini_ and packages ./temp into castle.kpa.
+	Reads metadata from _packages.config_ and packages ./temp into castle.kpa.
 
 Authors
 -------

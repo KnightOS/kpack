@@ -51,9 +51,14 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		
-		printf("Packaging into file '%s'\n\n", packager.filename);
+		printf("Packaging %s/%s:%d.%d.%d as %s...\n", packager.repo, packager.pkgname,
+				packager.version.major, packager.version.minor, packager.version.patch, packager.filename);
 		
 		packager.output = fopen(packager.filename, "wb");
+		if (!packager.output) {
+			printf("Error: unable to open %s for writing.\n", packager.filename);
+			exit(1);
+		}
 		
 		// See doc/package_format for information on package format
 		fputs("KPKG", packager.output);
@@ -85,14 +90,12 @@ int main(int argc, char **argv) {
 			closedir(rootDir);
 		}
 		
+		fclose(packager.output);
+		fclose(packager.config);
+		printf("Successfully wrote %s/%s:%d.%d.%d to %s.\n", packager.repo, packager.pkgname,
+				packager.version.major, packager.version.minor, packager.version.patch, packager.filename);
 		free(packager.pkgname);
 		free(packager.repo);
-		
-		fclose(packager.output);
-		
-		fclose(packager.config);
-		
-		printf("Packing done !\n");
 	} else {
 		// We're not packing, then what are we doing ?
 		if (packager.printMeta)

@@ -39,6 +39,11 @@ struct {
 	char *pkgname;
 	char *repo;
 	versionData version;
+	char *description;
+	char *author;
+	char *maintainer;
+	char *infourl;
+	char *copyright;
 	// Metadata
 	uint8_t mdlen;
 	// Files

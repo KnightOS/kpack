@@ -98,7 +98,7 @@ int parse_args(int argc, char **argv) {
 		printf("Invalid usage - no model specified. See kpack --help.\n");
 	}
 	
-	if(!packager.printMeta) {
+	if(!packager.printMeta && packager.pack) {
 		if (!packager.configName) {
 			packager.configName = "package.config";
 		}
@@ -212,9 +212,8 @@ int parse_metadata() {
 	return returnV;
 }
 
-void writeFileToPackage(char *f) {
-	// Don't include the model's root name
-	char *filename = strchr(f, '/');
+void writeFileToPackage(char *f, char *relpath) {
+	char *filename = relpath;
 	uint16_t crcsum;
 	// Uncompressed then compressed size
 	int usize = 0, csize = 0, c;
@@ -284,7 +283,7 @@ void writeFileToPackage(char *f) {
 	}
 }
 
-void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry) {
+void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *currentEntry) {
 	DIR *rroot;
 	struct dirent *rentry;
 	int rrootNameL;
@@ -299,14 +298,14 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry)
 			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
 			rfilename = malloc(rfilenameL * sizeof(char));
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
-			printf("Adding %s...\n", rfilename);
-			writeFileToPackage(rfilename);
+			char *relpath = malloc(strlen(rfilename) - strlen(top));
+			strcpy(relpath, rfilename + strlen(top));
+			printf("Adding %s...\n", relpath);
+			writeFileToPackage(rfilename, relpath);
 			free(rfilename);
 			currentEntry = readdir(root);
-			
 		} else if (currentEntry->d_type == DT_DIR) {
 			// found a directory, recursively explore it
-			// ... except if it's . or ..
 			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
 				rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
 				rrootName = malloc(rrootNameL * sizeof(char));
@@ -319,7 +318,7 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry)
 				} else {
 					rentry = readdir(rroot);
 					if(rentry) {
-						writeModelRecursive(rroot, rrootName, rentry);
+						writeModelRecursive(rroot, rrootName, top, rentry);
 					}
 					closedir(rroot);
 					free(rrootName);
@@ -343,7 +342,7 @@ void writeModel(DIR *root, char *rootName) {
 	
 	currentEntry = readdir(root);
 	if(currentEntry) {	
-		writeModelRecursive(root, rootName, currentEntry);
+		writeModelRecursive(root, rootName, rootName, currentEntry);
 		fseek(packager.output, fileNbLocation, SEEK_SET);
 		fputc(packager.fileNb, packager.output);
 	} else {

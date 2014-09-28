@@ -1,5 +1,6 @@
 #include "common.h"
 #include "packager.h"
+#include "unpack.h"
 
 void displayUsage() {
 	printf(
@@ -117,7 +118,13 @@ int main(int argc, char **argv) {
 			}
 		} else {
 			// We're unpacking
-			printf("Unpacking not supported yet.\n");
+			inputPackage = fopen(packager.filename, "rb");
+			if (!inputPackage) {
+				printf("Unable to open %s for reading.\n", packager.filename);
+			} else {
+				unpack(inputPackage, packager.rootName);
+				fclose(inputPackage);
+			}
 		}
 	}
 	

@@ -33,6 +33,7 @@ struct {
 	char *filename;
 	char *rootName;
 	FILE *output;
+	int fileNb;
 	//
 	// Package
 	//

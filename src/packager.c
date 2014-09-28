@@ -5,6 +5,7 @@ void initRuntime() {
 	packager.configName = NULL;
 	packager.pack = 1;
 	packager.printMeta = 0;
+	packager.fileNb = 0;
 	packager.filename = NULL;
 	packager.rootName = NULL;
 	packager.pkgname = NULL;
@@ -12,8 +13,8 @@ void initRuntime() {
 	packager.repo = NULL;
 	packager.version.major = packager.version.minor = packager.version.patch = -1;
 	packager.mdlen = 0;
-	packager.compressionType = COMPRESSION_PUCRUNCH;
-	packager.sumType = SUM_CRC16;
+	packager.compressionType = COMPRESSION_NONE;
+	packager.sumType = SUM_NONE;
 	packager.flen = 0;
 }
 
@@ -285,6 +286,7 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry,
 	while (currentEntry) {
 		if (currentEntry->d_type == DT_REG) {
 			// found a file, write it to output
+			packager.fileNb++;
 			printSpaces(indent);
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			printf("Adding file %s to package ...\n", rfilename);
@@ -321,11 +323,18 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry,
 }
 
 void writeModel(DIR *root, char *rootName) {
+	int fileNbLocation;
 	struct dirent *currentEntry;
+	
+	// Reserve one byte for the number of files
+	fileNbLocation = ftell(packager.output);
+	fputc(0, packager.output);
 	
 	currentEntry = readdir(root);
 	if(currentEntry) {	
 		writeModelRecursive(root, rootName, currentEntry, 0);
+		fseek(packager.output, fileNbLocation, SEEK_SET);
+		fputc(packager.fileNb, packager.output);
 	} else {
 		printf("Model %s is empty !\nAborting operation.\n", rootName);
 	}

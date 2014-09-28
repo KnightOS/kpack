@@ -2,15 +2,17 @@
 
 uint16_t calculateCRC16(FILE *in) {
 	uint16_t crcVal = 0xffff;
-	int c, backupSize = ftell(in);
+	int b, c, backupSize = ftell(in);
 	
 	fseek(in, 0, SEEK_SET);
 	
-	while ((c = fgetc(in)) != EOF) {
-		if ((crcVal ^ ((uint8_t)c << 8)) & 0x8000) {
-			crcVal = (crcVal << 1) ^ 0x1021; // x^12 + x^5 + 1
-		} else {
-			crcVal <<= 1;
+	while((c = fgetc(in)) != EOF) {
+		for(b = 0; b < 8; b++, c <<= 1) {
+			if((crcVal ^ (c >> 7)) & 0x8000) {
+				crcVal = (crcVal << 1) ^ 0x68da;
+			} else {
+				crcVal <<= 1;
+			}
 		}
 	}
 	

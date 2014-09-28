@@ -287,34 +287,34 @@ void writeFileToPackage(char *f) {
 void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry) {
 	DIR *rroot;
 	struct dirent *rentry;
-    int rrootNameL;
+	int rrootNameL;
 	char *rrootName;
-    int rfilenameL;
+	int rfilenameL;
 	char *rfilename;
 	
 	while (currentEntry) {
 		if (currentEntry->d_type == DT_REG) {
 			// found a file, write it to output
 			packager.fileNb++;
-            rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
-            rfilename = malloc(rfilenameL * sizeof(char));
+			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
+			rfilename = malloc(rfilenameL * sizeof(char));
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			printf("Adding %s...\n", rfilename);
 			writeFileToPackage(rfilename);
-            free(rfilename);
+			free(rfilename);
 			currentEntry = readdir(root);
 			
 		} else if (currentEntry->d_type == DT_DIR) {
 			// found a directory, recursively explore it
 			// ... except if it's . or ..
 			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
-                rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
-                rrootName = malloc(rrootNameL * sizeof(char));
+				rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
+				rrootName = malloc(rrootNameL * sizeof(char));
 				sprintf(rrootName, "%s/%s", rootName, currentEntry->d_name);
 				rroot = opendir(rrootName);
 				if(!rroot) {
 					printf("Error: couldn't open %s\n", rrootName);
-                    free(rrootName);
+					free(rrootName);
 					exit(1);
 				} else {
 					rentry = readdir(rroot);
@@ -322,7 +322,7 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry)
 						writeModelRecursive(rroot, rrootName, rentry);
 					}
 					closedir(rroot);
-                    free(rrootName);
+					free(rrootName);
 				}
 				currentEntry = readdir(root);
 			} else {

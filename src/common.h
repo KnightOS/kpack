@@ -29,6 +29,7 @@ struct {
 	FILE *config;
 	char *configName;
 	int pack;
+	int printMeta;
 	char *filename;
 	char *rootName;
 	FILE *output;

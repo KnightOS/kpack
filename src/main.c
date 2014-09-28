@@ -13,6 +13,8 @@ void displayUsage() {
 		"\t\tSpecifies an alternate config file.\n"
 		"\t-e|--extract\n"
 		"\t\tExtracts a package instead of creating one.\n"
+		"\t-i|--info\n"
+		"\t\tPrints information about a given package.\n"
 		"\t-s|--sum\n"
 		"\t\tSpecifies a checksum algorithm to use, among 'crc16', 'sha1', 'md5' and 'none', defaulting to 'crc16'\n"
 		"\t-x|--compressor\n"
@@ -23,6 +25,8 @@ void displayUsage() {
 int main(int argc, char **argv) {
 	// File parsing
 	DIR *rootDir;
+	// For printing metadata
+	FILE *inputPackage;
 	
 	initRuntime();
 	
@@ -31,9 +35,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	
-	printf("\nArgument parsing successful.\n\n");
-	
-	// Pack things
+	// We're packing
 	if (packager.pack) {
 		if (parse_metadata()) {
 			printf("Aborting operation.\n");
@@ -47,7 +49,7 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		
-		printf("Metadata parsing successful.\nPackaging into file '%s'\n\n", packager.filename);
+		printf("Packaging into file '%s'\n\n", packager.filename);
 		
 		packager.output = fopen(packager.filename, "wb");
 		
@@ -90,7 +92,21 @@ int main(int argc, char **argv) {
 		
 		printf("Packing done !\n");
 	} else {
-		printf("Unpacking not supported yet.\n");
+		// We're not packing, then what are we doing ?
+		if (packager.printMeta)
+		{
+			// We're printing metadata from a package
+			inputPackage = fopen(packager.filename, "rb");
+			if (!inputPackage) {
+				printf("Couldn't find %s. Aborting operation.\n", packager.filename);
+			} else {
+				printMetadata(inputPackage);
+				fclose(inputPackage);
+			}
+		} else {
+			// We're unpacking
+			printf("Unpacking not supported yet.\n");
+		}
 	}
 	
 	return 0;

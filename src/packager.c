@@ -4,6 +4,7 @@ void initRuntime() {
 	packager.config = NULL;
 	packager.configName = NULL;
 	packager.pack = 1;
+	packager.printMeta = 0;
 	packager.filename = NULL;
 	packager.rootName = NULL;
 	packager.pkgname = NULL;
@@ -32,6 +33,9 @@ int parse_args(int argc, char **argv) {
 			packager.configName = argv[i];
 		} else if (match_option("-e", "--extract")) {
 			packager.pack = 0;
+		} else if (match_option("-i", "--info")) {
+			packager.pack = 0;
+			packager.printMeta = 1;
 		} else if (match_option("-s", "--sum")) {
 			i++;
 			if (strcmp(argv[i], "crc16") == 0) {
@@ -77,19 +81,21 @@ int parse_args(int argc, char **argv) {
 		printf("Expected a package name, none found.\n");
 		return 1;
 	}
-	if (!packager.rootName) {
+	if (!packager.rootName && !packager.printMeta) {
 		printf("Expected a model name, none found.\n");
 	}
 	
-	if (!packager.configName) {
-		packager.configName = "package.config";
-	}
+	if(!packager.printMeta) {
+		if (!packager.configName) {
+			packager.configName = "package.config";
+		}
+			
+		packager.config = fopen(packager.configName, "r");
 		
-	packager.config = fopen(packager.configName, "r");
-	
-	if (!packager.config) {
-		printf("Config file '%s' not found.\n", packager.configName);
-		return 1;
+		if (!packager.config) {
+			printf("Config file '%s' not found.\n", packager.configName);
+			return 1;
+		}
 	}
 	
 	return 0;
@@ -322,5 +328,96 @@ void writeModel(DIR *root, char *rootName) {
 		writeModelRecursive(root, rootName, currentEntry, 0);
 	} else {
 		printf("Model %s is empty !\nAborting operation.\n", rootName);
+	}
+}
+
+inline void printBytes(FILE *in, int l) {
+	for (; l > 0; l--) {
+		printf("%c", fgetc(in));
+	}
+	printf("\n");
+}
+
+inline void printVersion(FILE *in) {
+	versionData holder;
+	holder.major = fgetc(in);
+	holder.minor = fgetc(in);
+	printf("Version : %d.%d.%d\n", holder.major, holder.minor, fgetc(in));
+}
+
+void printMetadata(FILE *inputPackage) {
+	int i, j, nbMeta;
+	int key, len;
+	// Used to print package dependencies
+	int pkgnb, included, nlen;
+	// Generic package testing
+	char magic[5] = { 0 };
+	
+	for (i = 0; i < 4; i++) {
+		magic[i] = fgetc(inputPackage);
+	}
+	
+	if (strcmp(magic, "KPKG")) {
+		printf("Provided file is not a valid KnightOS package !\n");
+	} else if (fgetc(inputPackage) != KPKG_FORMAT_VERSION) {
+		printf("This file uses an incompatible version of the KnightOS package format specification.\nConsider updating either kpack or the package itself.\n");
+	} else {
+		nbMeta = fgetc(inputPackage);
+		
+		for (i = 0; i < nbMeta; i++)
+		{
+			key = fgetc(inputPackage);
+			len = fgetc(inputPackage);
+			
+			switch(key) {
+				case KEY_PKG_NAME:
+					printf("Name : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_PKG_REPO:
+					printf("Repository : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_PKG_DESCRIPTION:
+					printf("Description : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_PKG_DEPS:
+					pkgnb = fgetc(inputPackage);
+					printf("Dependencies : %d\n", pkgnb);
+					
+					for (j = 0; j < pkgnb; j++) {
+						included = fgetc(inputPackage);
+						printf("  ");
+						printVersion(inputPackage);
+						nlen = fgetc(inputPackage);
+						printf("  Name : ");
+						printBytes(inputPackage, nlen);
+						printf(included ? "Present packages includes this dependency.\n" : "Present packages does not include this dependency.\n");
+					}
+					break;
+				case KEY_PKG_VERSION:
+					printVersion(inputPackage);
+					break;
+				case KEY_PKG_AUTHOR:
+					printf("Author : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_PKG_MAINTENER:
+					printf("Maintener : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_PKG_COPYRIGHT:
+					printf("License : ");
+					printBytes(inputPackage, len);
+					break;
+				case KEY_INFO_URL:
+					printf("More info on : ");
+					printBytes(inputPackage, len);
+					break;
+				default:
+					printf("Unknown meta field encountered : %x", key);
+			}
+		}
 	}
 }

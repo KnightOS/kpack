@@ -54,7 +54,7 @@ The following keys are currently included in this specification:
   LEN is the total number of packages that this package depends on. The packager may choose
   to include additional packages in this same package file, to fulfill its dependencies. If
   the listed dependency is included in this package file, INC will be 1, or otherwise 0. Each
-  depdency is then listed with its full name (i.e. "core/corelib"), prefixed by the length
+  dependency is then listed with its full name (i.e. "core/corelib"), prefixed by the length
   NLEN. VERSION is the minimum version of this package required, as described below:
 
 - KEY_PKG_VERSION (0x04): The package version takes the form of:
@@ -75,7 +75,7 @@ The following keys are currently included in this specification:
 - KEY_INFO_URL (0x08): The fully qualified URL where information about this package may be
   obtained, usually the source code or documentation.
 
-Combining KEY_PKG_NAME and KEY_PKG_REPO gives you the full name of the package
+Prepending KEY_PKG_REPO to KEY_PKG_NAME gives you the full name of the package
 (i.e. "core/corelib").
 
 ## Package Files

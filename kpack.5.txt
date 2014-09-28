@@ -1,0 +1,73 @@
+/////
+vim:set ts=4 sw=4 tw=82 noet:
+/////
+kpack (5)
+========
+
+Name
+----
+kpack - KnightOS package configuration files
+
+Description
+-----------
+
+KnightOS packages contain a lot of useful metadata that identifies authorship
+information, package descriptions, dependencies, and so on.
+
+A simple package.config looks like this:
+
+	[meta]
+	name=packagename
+	repo=community
+	version=1.0.0
+
+Only these three properties are required, the rest are optional. You may use
+comments by starting a line with #.
+
+**name**::
+	The name of the package.
+
+**repo**::
+	The package repository. The following repositories are tracked upstream:
+
+	* _core_: Core KnightOS packages, installed by default
+	* _community_: Packages written by the community at large
+	* _ports_: Software ported from other platforms
+
+**version**::
+	The current package version. This _must_ be in the format MAJOR.MINOR.PATCH.
+	See semantic versioning <http://semver.org/> for details.
+
+**description** (optional)::
+	A user-friendly description of this package.
+
+**author** (optional)::
+	The person who originally wrote this software. The suggested format of this
+	field is **Author Name <author email>** (i.e. **Drew DeVault <sir@cmpwn.com>**).
+
+**maintainer** (optional)::
+	The person who maintains this package. This may be different than the author.
+
+**infourl** (optional)::
+	A URL at which information about this software may be obtained.
+
+**copyright** (optional)::
+	The name of the license or the copyright statement for this package. Optional
+	but strongly suggested. Examples might include:
+
+	* MIT license
+	* Public Domain
+	* GPLv2
+	* Copyright John Doe 2014, All Rights Reserved
+
+	You may also wish to include a license file in your package itself with a
+	longer license statement. It's reccommended that you distribute your full
+	license text alongside the package, rather than inside of it, to save valuable
+	space on the installed device.
+
+Authors
+-------
+
+Maintained by Drew DeVault <sir@cmpwn.com>, who is assisted by other open
+source contributors. For more information about kpkg development, see
+<https://github.com/KnightOS/kpkg>.

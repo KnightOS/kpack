@@ -40,8 +40,7 @@ Options
 Configuration
 -------------
 
-An annotated example config is distributed with kpack. See it for information on
-available package config options.
+See **kpack**(5)
 
 Examples
 --------
@@ -55,3 +54,8 @@ Authors
 Maintained by Drew DeVault <sir@cmpwn.com>, who is assisted by other open
 source contributors. For more information about kpkg development, see
 <https://github.com/KnightOS/kpkg>.
+
+See Also
+--------
+
+**kpack**(5)

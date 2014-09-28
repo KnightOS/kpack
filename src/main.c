@@ -3,22 +3,24 @@
 
 void displayUsage() {
 	printf(
-		"KnightOS package manager - packs or unpacks a KnightOS package from or into a directory model.\n"
+		"KnightOS package manager - Manipulates KnightOS software packages\n"
 		"\n"
-		"Usage: kpack [-c|--config configFile] [-e|--extract] [-s|--sum crc16|sha1|md5|none] [-x|--compressor pucrunch|rle|none] _package_ _model_\n"
+		"Usage: kpack [options] package model\n"
 		"See `man 1 kpack` for details.\n"
 		"\n"
 		"Options:\n"
-		"\t-c|--config\n"
+		"\t-c, --config\n"
 		"\t\tSpecifies an alternate config file.\n"
-		"\t-e|--extract\n"
+		"\t-e, --extract\n"
 		"\t\tExtracts a package instead of creating one.\n"
-		"\t-i|--info\n"
+		"\t-i, --info\n"
 		"\t\tPrints information about a given package.\n"
-		"\t-s|--sum\n"
-		"\t\tSpecifies a checksum algorithm to use, among 'crc16', 'sha1', 'md5' and 'none', defaulting to 'crc16'\n"
-		"\t-x|--compressor\n"
-		"\t\tSpecifies the compressor to use among 'pucrunch', 'rle' and 'none', defaulting to 'pucrunch'\n"
+		"\t-s, --sum\n"
+		"\t\tSpecifies a checksum algorithm to use. Valid options are:\n"
+		"\t\tcrc16, sha1, md5, none (default: none)\n"
+		"\t-x, --compressor\n"
+		"\t\tSpecifies the compression algorithm to use. Valid options are:\n"
+		"\t\tpucrunch, rle, none (default: none)'\n"
 	);
 }
 

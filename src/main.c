@@ -13,6 +13,8 @@ void displayUsage() {
 		"\t\tSpecifies an alternate config file.\n"
 		"\t-e, --extract\n"
 		"\t\tExtracts a package instead of creating one.\n"
+		"\t-h, --help\n"
+		"\t\tDisplays this page.\n"
 		"\t-i, --info\n"
 		"\t\tPrints information about a given package.\n"
 		"\t-s, --sum\n"
@@ -25,17 +27,22 @@ void displayUsage() {
 }
 
 int main(int argc, char **argv) {
+	int argParsing;
 	// File parsing
 	DIR *rootDir;
 	// For printing metadata
 	FILE *inputPackage;
-	
 	initRuntime();
 	
-	if (parse_args(argc, argv)) {
+	argParsing = parse_args(argc, argv);
+	
+	if (argParsing > 0) {
+		return 0;
+	} else if (argParsing < 0) {
 		printf("Aborting operation.\n");
 		return 1;
 	}
+	
 	
 	// We're packing
 	if (packager.pack) {

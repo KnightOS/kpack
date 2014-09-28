@@ -1,4 +1,5 @@
 #include "common.h"
+#include "checksums.h"
 
 void initRuntime() {
 	packager.config = NULL;
@@ -33,7 +34,7 @@ int parse_args(int argc, char **argv) {
 	if (!argc) {
 		printf("Invalid usage.\n\n");
 		displayUsage();
-		return 1;
+		return -1;
 	}
 	for (i = 0; i < argc; i++) {
 		if (match_option("-c", "--config")) {
@@ -41,6 +42,9 @@ int parse_args(int argc, char **argv) {
 			packager.configName = argv[i];
 		} else if (match_option("-e", "--extract")) {
 			packager.pack = 0;
+		} else if (match_option("-h", "--help")) {
+			displayUsage();
+			return 1;
 		} else if (match_option("-i", "--info")) {
 			packager.pack = 0;
 			packager.printMeta = 1;
@@ -56,7 +60,7 @@ int parse_args(int argc, char **argv) {
 				packager.sumType = SUM_NONE;
 			} else {
 				printf("Invalid checksum type. See kpack --help.\n");
-				return 1;
+				return -1;
 			}
 		} else if (match_option("-x", "--compressor")) {
 			i++;
@@ -68,7 +72,7 @@ int parse_args(int argc, char **argv) {
 				packager.compressionType = COMPRESSION_NONE;
 			} else {
 				printf("Invalid compression type. See kpack --help.\n");
-				return 1;
+				return -1;
 			}
 		} else {
 			if (!packager.filename) {
@@ -81,14 +85,14 @@ int parse_args(int argc, char **argv) {
 				}
 			} else {
 				printf("Error: unrecognized argument %s.\n", argv[i]);
-				return 1;
+				return -1;
 			}
 		}
 	}
 	
 	if (!packager.filename) {
 		printf("Invalid usage - no package specified. See kpack --help.\n");
-		return 1;
+		return -1;
 	}
 	if (!packager.rootName && !packager.printMeta) {
 		printf("Invalid usage - no model specified. See kpack --help.\n");
@@ -103,7 +107,7 @@ int parse_args(int argc, char **argv) {
 		
 		if (!packager.config) {
 			printf("Config file '%s' not found.\n", packager.configName);
-			return 1;
+			return -1;
 		}
 	}
 	
@@ -210,51 +214,59 @@ int parse_metadata() {
 
 void writeFileToPackage(char *f) {
 	// Don't include the model's root name
-	int size, c;
 	char *filename = strchr(f, '/');
+	uint16_t crcsum;
+	// Uncompressed then compressed size
+	int usize = 0, csize = 0, c;
 	FILE *in = fopen(f, "rb");
 	int plen = strlen(filename);
+	
 	fputc(plen, packager.output);
 	fputs(filename, packager.output);
 	fputc(packager.compressionType, packager.output);
+	
 	fseek(in, 0, SEEK_END);
-	size = ftell(in);
+	usize = ftell(in);
 	fseek(in, 0, SEEK_SET);
-	// 24-bits size
-	fputc(size & 0xff, packager.output);
-	fputc((size >> 8) & 0xff, packager.output);
-	fputc((size >> 16) & 0xff, packager.output);
-	if (packager.compressionType == COMPRESSION_RLE) {
+	// 24-bits uncompressed file's size
+	fputc(usize & 0xff, packager.output);
+	fputc((usize >> 8) & 0xff, packager.output);
+	fputc((usize >> 16) & 0xff, packager.output);
+	
+	if (packager.compressionType == COMPRESSION_NONE) {
+		csize = usize;
+	} else if (packager.compressionType == COMPRESSION_RLE) {
 		//
 		// TODO
 		//
 		// RLE compression
-		// put compressed size in variable 'size'
+		// put compressed size in variable 'csize'
 	} else if (packager.compressionType == COMPRESSION_PUCRUNCH) {
 		//
 		// TODO
 		//
 		// pucrunch compression
-		// put compressed size in variable 'size'
+		// put compressed size in variable 'csize'
 	}
-	// 24-bits size
-	fputc(size & 0xff, packager.output);
-	fputc((size >> 8) & 0xff, packager.output);
-	fputc((size >> 16) & 0xff, packager.output);
+	// 24-bits compressed file's size
+	fputc(csize & 0xff, packager.output);
+	fputc((csize >> 8) & 0xff, packager.output);
+	fputc((csize >> 16) & 0xff, packager.output);
 	
-	while ((c = getc(in)) != EOF) {
+	while ((c = fgetc(in)) != EOF) {
 		fputc(c, packager.output);
 	}
 	
 	if (packager.sumType == SUM_NONE) {
+		// No checksum
 		fputc(SUM_NONE, packager.output);
 	} else if (packager.sumType == SUM_CRC16) {
+		// CRC-16 checksum
+		// See checksums.c for implementation
 		fputc(SUM_CRC16, packager.output);
-		//
-		// TODO
-		//
-		// CRC16 checksum
-		// directly write the thing
+		crcsum = calculateCRC16(in);
+		fputc(crcsum & 0xff, packager.output);
+		fputc(crcsum >> 8, packager.output);
 	} else if (packager.sumType == SUM_SHA1) {
 		fputc(SUM_SHA1, packager.output);
 		//

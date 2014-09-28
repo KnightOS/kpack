@@ -342,7 +342,7 @@ inline void printVersion(FILE *in) {
 	versionData holder;
 	holder.major = fgetc(in);
 	holder.minor = fgetc(in);
-	printf("Version : %d.%d.%d\n", holder.major, holder.minor, fgetc(in));
+	printf("Version: %d.%d.%d\n", holder.major, holder.minor, fgetc(in));
 }
 
 void printMetadata(FILE *inputPackage) {
@@ -371,27 +371,27 @@ void printMetadata(FILE *inputPackage) {
 			
 			switch(key) {
 				case KEY_PKG_NAME:
-					printf("Name : ");
+					printf("Name: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_PKG_REPO:
-					printf("Repository : ");
+					printf("Repository: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_PKG_DESCRIPTION:
-					printf("Description : ");
+					printf("Description: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_PKG_DEPS:
 					pkgnb = fgetc(inputPackage);
-					printf("Dependencies : %d\n", pkgnb);
+					printf("Dependencies: %d\n", pkgnb);
 					
 					for (j = 0; j < pkgnb; j++) {
 						included = fgetc(inputPackage);
 						printf("  ");
 						printVersion(inputPackage);
 						nlen = fgetc(inputPackage);
-						printf("  Name : ");
+						printf("  Name: ");
 						printBytes(inputPackage, nlen);
 						printf(included ? "Present packages includes this dependency.\n" : "Present packages does not include this dependency.\n");
 					}
@@ -400,23 +400,24 @@ void printMetadata(FILE *inputPackage) {
 					printVersion(inputPackage);
 					break;
 				case KEY_PKG_AUTHOR:
-					printf("Author : ");
+					printf("Author: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_PKG_MAINTENER:
-					printf("Maintener : ");
+					printf("Maintainer: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_PKG_COPYRIGHT:
-					printf("License : ");
+					printf("License: ");
 					printBytes(inputPackage, len);
 					break;
 				case KEY_INFO_URL:
-					printf("More info on : ");
+					printf("More info on: ");
 					printBytes(inputPackage, len);
 					break;
 				default:
-					printf("Unknown meta field encountered : %x", key);
+					printf("Unknown meta field encountered: 0x%02X", key);
+					break;
 			}
 		}
 	}

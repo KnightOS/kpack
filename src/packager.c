@@ -281,11 +281,7 @@ void writeModelRecursive(DIR *root, char *rootName, struct dirent *currentEntry)
 	while (currentEntry) {
 		if (currentEntry->d_type == DT_REG) {
 			// found a file, write it to output
-<<<<<<< HEAD
 			packager.fileNb++;
-			printSpaces(indent);
-=======
->>>>>>> c86259899723bfa8e1845e02da136f89110228da
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			printf("Adding %s...\n", rfilename);
 			writeFileToPackage(rfilename);
@@ -326,13 +322,9 @@ void writeModel(DIR *root, char *rootName) {
 	
 	currentEntry = readdir(root);
 	if(currentEntry) {	
-<<<<<<< HEAD
-		writeModelRecursive(root, rootName, currentEntry, 0);
+		writeModelRecursive(root, rootName, currentEntry);
 		fseek(packager.output, fileNbLocation, SEEK_SET);
 		fputc(packager.fileNb, packager.output);
-=======
-		writeModelRecursive(root, rootName, currentEntry);
->>>>>>> c86259899723bfa8e1845e02da136f89110228da
 	} else {
 		printf("Error: %s is empty!\n", rootName);
 		exit(1);

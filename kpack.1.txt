@@ -45,8 +45,8 @@ See **kpack**(5)
 Examples
 --------
 
-kpack castle.kpa ./temp::
-	Reads metadata from _packages.config_ and packages ./temp into castle.kpa.
+kpack castle.pkg ./temp::
+	Reads metadata from _packages.config_ and packages ./temp into castle.pkg.
 
 Authors
 -------

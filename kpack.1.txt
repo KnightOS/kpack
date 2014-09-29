@@ -33,7 +33,11 @@ Options
 	Specifies the compressor to use. Valid options are "pucrunch", "rle", and
 	"none". The default is pucrunch.
 
-*-s, \--sum* <checksum>::
+*-s, \--stubs*::
+	Instructs kpack, when extracting packages, to create a package stub for the
+	extracted package.
+
+*-k, \--sum* <checksum>::
 	Specifies a checksum algorithm to use. Valid options are "crc16", "sha1",
 	"md5", and "none". The default is "crc16".
 

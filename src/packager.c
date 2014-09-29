@@ -51,7 +51,7 @@ int parse_args(int argc, char **argv) {
 		} else if (match_option("-i", "--info")) {
 			packager.pack = 0;
 			packager.printMeta = 1;
-		} else if (match_option("-s", "--sum")) {
+		} else if (match_option("-k", "--sum")) {
 			i++;
 			if (strcmp(argv[i], "crc16") == 0) {
 				packager.sumType = SUM_CRC16;

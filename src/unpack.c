@@ -35,6 +35,7 @@ void mkpath(const char *_path) {
 
 void unpack(FILE *file, const char *root, int write_stub) {
 	char *name = NULL, *repo = NULL;
+	FILE *stub = NULL;
 	int major = -1, minor = -1, patch = -1;
 	char magic[5] = { 0 };
 	fread(magic, sizeof(char), sizeof(magic) / sizeof(char), file);
@@ -72,6 +73,8 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		exit(1);
 	}
 	printf("Extracting %s/%s:%d.%d.%d to %s\n", repo, name, major, minor, patch, root);
+	uint8_t fileslen = 0;
+	fread(&fileslen, sizeof(uint8_t), 1, file);
 	if (write_stub) {
 		long pos = ftell(file);
 		fseek(file, 0, SEEK_SET);
@@ -82,7 +85,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		strcat(stubdir, repo);
 		mkpath(stubdir);
 		sprintf(stubdir + strlen(root) + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);
-		FILE *stub = fopen(stubdir, "wb");
+		stub = fopen(stubdir, "wb");
 		if (!stub) {
 			printf("Unable to open %s for writing.\n", stubdir);
 			exit(1);
@@ -91,17 +94,18 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		char *buffer = malloc(pos);
 		fread(buffer, sizeof(uint8_t), pos, file);
 		fwrite(buffer, sizeof(uint8_t), pos, stub);
-		fclose(stub);
 	}
 	/* Extract files */
-	uint8_t fileslen = 0;
-	fread(&fileslen, sizeof(uint8_t), 1, file);
 	for (i = 0; i < fileslen; ++i) {
 		uint8_t pathlen = 0;
 		fread(&pathlen, sizeof(uint8_t), 1, file);
 		char *path = calloc(pathlen, sizeof(char));
 		fread(path, sizeof(uint8_t), pathlen, file);
-		printf("Extracting %s...\n", path);
+		if (write_stub) {
+			/* Copy file header to stub */
+			fwrite(&pathlen, sizeof(uint8_t), 1, stub);
+			fwrite(path, sizeof(uint8_t), pathlen, stub);
+		}
 		uint8_t compression;
 		fread(&compression, sizeof(uint8_t), 1, file);
 		uint32_t uncompressedlen = 0;
@@ -121,9 +125,18 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		}
 		char *outpath = calloc(strlen(dir) + strlen(root) + 1, sizeof(char));
 		strcpy(outpath, root);
+		int skip = 0;
+		if (write_stub && strstr(dir, "/include") == dir) {
+			skip = 1;
+			printf("Omitting %s.\n", path);
+		} else {
+			printf("Extracting %s...\n", path);
+		}
 		strcat(outpath, dir);
 		free(dir);
-		mkpath(outpath);
+		if (!skip) {
+			mkpath(outpath);
+		}
 		/* Write the file */
 		char *base = calloc(strlen(path), sizeof(char));
 		strcpy(base, path);
@@ -133,26 +146,30 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		outfile[strlen(outpath)] = '/';
 		outfile[strlen(outpath) + 1] = '\0';
 		strcat(outfile, base);
-		FILE *output = fopen(outfile, "wb");
-		if (!output) {
-			printf("Unable to open %s for writing.\n", outfile);
-			exit(1);
+		if (!skip) {
+			FILE *output = fopen(outfile, "wb");
+			if (!output) {
+				printf("Unable to open %s for writing.\n", outfile);
+				exit(1);
+			}
+			char *buffer = malloc(256);
+			/* TODO: Compression */
+			while (uncompressedlen > 0) {
+				size_t len = uncompressedlen;
+				if (len > 256) {
+					len = 256;
+				}
+				len = fread(buffer, sizeof(char), len, file);
+				fwrite(buffer, sizeof(char), len, output);
+				uncompressedlen -= len;
+			}
+			fclose(output);
+			free(buffer);
+		} else {
+			fseek(file, uncompressedlen, SEEK_CUR);
 		}
 		free(outpath);
 		free(outfile);
-		char *buffer = malloc(256);
-		/* TODO: Compression */
-		while (uncompressedlen > 0) {
-			size_t len = uncompressedlen;
-			if (len > 256) {
-				len = 256;
-			}
-			len = fread(buffer, sizeof(char), len, file);
-			fwrite(buffer, sizeof(char), len, output);
-			uncompressedlen -= len;
-		}
-		fclose(output);
-		free(buffer);
 		/* Checksum */
 		uint8_t sumtype = 0;
 		fread(&sumtype, sizeof(uint8_t), 1, file);
@@ -169,5 +186,8 @@ void unpack(FILE *file, const char *root, int write_stub) {
 			exit(1);
 		}
 		free(path);
+	}
+	if (write_stub) {
+		fclose(stub);
 	}
 }

@@ -76,6 +76,9 @@ int parse_args(int argc, char **argv) {
 				printf("Invalid compression type. See kpack --help.\n");
 				return -1;
 			}
+		} else if (*argv[i] == '-') {
+			printf("Unknown option %s. See kpack --help for usage.\n", argv[i]);
+			return -1;
 		} else {
 			if (!packager.filename) {
 				packager.filename = argv[i];

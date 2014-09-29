@@ -5,6 +5,7 @@ void initRuntime() {
 	packager.config = NULL;
 	packager.configName = NULL;
 	packager.pack = 1;
+	packager.stub = 0;
 	packager.printMeta = 0;
 	packager.fileNb = 0;
 	packager.filename = NULL;
@@ -42,6 +43,8 @@ int parse_args(int argc, char **argv) {
 			packager.configName = argv[i];
 		} else if (match_option("-e", "--extract")) {
 			packager.pack = 0;
+		} else if (match_option("-s", "--stub")) {
+			packager.stub = 1;
 		} else if (match_option("-h", "--help")) {
 			displayUsage();
 			return 1;

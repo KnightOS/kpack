@@ -33,7 +33,9 @@ void mkpath(const char *_path) {
 	free(path);
 }
 
-void unpack(FILE *file, const char *root) {
+void unpack(FILE *file, const char *root, int write_stub) {
+	char *name = NULL, *repo = NULL;
+	int major = -1, minor = -1, patch = -1;
 	char magic[5] = { 0 };
 	fread(magic, sizeof(char), sizeof(magic) / sizeof(char), file);
 	if (strcmp(magic, "KPKG")) {
@@ -41,15 +43,55 @@ void unpack(FILE *file, const char *root) {
 		fclose(file);
 		exit(1);
 	}
-	/* Skip metadata */
+	/* Process metadata */
 	uint8_t keyslen = 0;
 	fread(&keyslen, sizeof(uint8_t), 1, file);
 	int i;
 	for (i = 0; i < keyslen; ++i) {
 		uint8_t vlen = 0;
-		fgetc(file); // Discard key
+		uint8_t key = fgetc(file);
 		fread(&vlen, sizeof(uint8_t), 1, file);
-		fseek(file, vlen, SEEK_CUR);
+		if (key == KEY_PKG_REPO) {
+			repo = malloc(vlen + 1);
+			fread(repo, sizeof(char), vlen, file);
+			repo[vlen] = '\0';
+		} else if (key == KEY_PKG_NAME) {
+			name = malloc(vlen + 1);
+			fread(name, sizeof(char), vlen, file);
+			name[vlen] = '\0';
+		} else if (key == KEY_PKG_VERSION) {
+			major = fgetc(file);
+			minor = fgetc(file);
+			patch = fgetc(file);
+		} else {
+			fseek(file, vlen, SEEK_CUR); // Discard value
+		}
+	}
+	if (name == NULL || repo == NULL || major == -1) {
+		printf("Error: invalid package (name, repo, and version is all required.");
+		exit(1);
+	}
+	printf("Extracting %s/%s:%d.%d.%d to %s\n", repo, name, major, minor, patch, root);
+	if (write_stub) {
+		long pos = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		/* Make sure /var/packages/<repo>/ exists */
+		char *stubdir = malloc(strlen(root) + strlen(repo) + strlen("/var/packages/") + strlen(name) + strlen("-256.256.256.pkg"));
+		strcpy(stubdir, root);
+		strcat(stubdir, "/var/packages/");
+		strcat(stubdir, repo);
+		mkpath(stubdir);
+		sprintf(stubdir + strlen(root) + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.pkg", name, major, minor, patch);
+		FILE *stub = fopen(stubdir, "wb");
+		if (!stub) {
+			printf("Unable to open %s for writing.\n", stubdir);
+			exit(1);
+		}
+		free(stubdir);
+		char *buffer = malloc(pos);
+		fread(buffer, sizeof(uint8_t), pos, file);
+		fwrite(buffer, sizeof(uint8_t), pos, stub);
+		fclose(stub);
 	}
 	/* Extract files */
 	uint8_t fileslen = 0;

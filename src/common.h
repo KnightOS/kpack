@@ -30,6 +30,7 @@ struct {
 	char *configName;
 	int pack;
 	int printMeta;
+	int stub;
 	char *filename;
 	char *rootName;
 	FILE *output;

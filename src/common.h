@@ -41,6 +41,8 @@ struct {
 	char *repo;
 	versionData version;
 	char *description;
+	int depsNb;
+	packageDependency **deps;
 	char *author;
 	char *maintainer;
 	char *infourl;
@@ -60,7 +62,7 @@ enum {
 	KEY_PKG_DEPS,
 	KEY_PKG_VERSION,
 	KEY_PKG_AUTHOR,
-	KEY_PKG_MAINTENER,
+	KEY_PKG_MAINTAINER,
 	KEY_PKG_COPYRIGHT,
 	KEY_INFO_URL
 };

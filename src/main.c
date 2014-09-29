@@ -27,6 +27,30 @@ void displayUsage() {
 	);
 }
 
+void freeMetadata() {
+	if(packager.pkgname) {
+		free(packager.pkgname);
+	}
+	if(packager.repo) {
+		free(packager.repo);
+	}
+	if(packager.description) {
+		free(packager.description);
+	}
+	if(packager.author) {
+		free(packager.author);
+	}
+	if(packager.maintainer) {
+		free(packager.maintainer);
+	}
+	if(packager.copyright) {
+		free(packager.copyright);
+	}
+	if(packager.infourl) {
+		free(packager.infourl);
+	}
+}
+
 int main(int argc, char **argv) {
 	int argParsing;
 	// File parsing
@@ -49,12 +73,7 @@ int main(int argc, char **argv) {
 	if (packager.pack) {
 		if (parse_metadata()) {
 			printf("Aborting operation.\n");
-			if (packager.pkgname) {
-				free(packager.pkgname);
-			}
-			if (packager.repo) {
-				free(packager.repo);
-			}
+			freeMetadata();
 			fclose(packager.config);
 			return 1;
 		}
@@ -65,7 +84,8 @@ int main(int argc, char **argv) {
 		packager.output = fopen(packager.filename, "wb");
 		if (!packager.output) {
 			printf("Error: unable to open %s for writing.\n", packager.filename);
-			exit(1);
+			freeMetadata();
+			return 1;
 		}
 		
 		// See doc/package_format for information on package format
@@ -88,6 +108,42 @@ int main(int argc, char **argv) {
 		fputc(packager.version.major, packager.output);
 		fputc(packager.version.minor, packager.output);
 		fputc(packager.version.patch, packager.output);
+		// Then write all the optional metadata fields by iterating through them
+		// Package description
+		if(packager.description) {
+			fputc(KEY_PKG_DESCRIPTION, packager.output);
+			fputc(strlen(packager.description), packager.output);
+			fputs(packager.description, packager.output);
+			free(packager.description);
+		}
+		// Package's author
+		if(packager.author) {
+			fputc(KEY_PKG_AUTHOR, packager.output);
+			fputc(strlen(packager.author), packager.output);
+			fputs(packager.author, packager.output);
+			free(packager.author);
+		}
+		// Package's maintainer
+		if(packager.maintainer) {
+			fputc(KEY_PKG_MAINTAINER, packager.output);
+			fputc(strlen(packager.maintainer), packager.output);
+			fputs(packager.maintainer, packager.output);
+			free(packager.maintainer);
+		}
+		// Package's copyright
+		if(packager.copyright) {
+			fputc(KEY_PKG_COPYRIGHT, packager.output);
+			fputc(strlen(packager.copyright), packager.output);
+			fputs(packager.copyright, packager.output);
+			free(packager.copyright);
+		}
+		// Package's info URL
+		if(packager.infourl) {
+			fputc(KEY_INFO_URL, packager.output);
+			fputc(strlen(packager.infourl), packager.output);
+			fputs(packager.infourl, packager.output);
+			free(packager.infourl);
+		}
 		
 		// Write files
 		rootDir = opendir(packager.rootName);

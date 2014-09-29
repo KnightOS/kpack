@@ -20,6 +20,8 @@ void initRuntime() {
 	packager.version.major = packager.version.minor = packager.version.patch = -1;
 	/* optional metadata */
 	packager.description = NULL;
+	packager.depsNb = 0;
+	packager.deps = NULL;
 	packager.author = NULL;
 	packager.maintainer = NULL;
 	packager.infourl = NULL;
@@ -124,7 +126,12 @@ char *config_read_line() {
 	while (1) {
 		c = fgetc(packager.config);
 		if (c == EOF || c == '\n') {
-			result[size - 1] = '\0';
+			if (size == 1) {
+				result[size - 1] = c == EOF ? '\0' : c;
+				result[size] = '\0';
+			} else {
+				result[size - 1] = '\0';
+			}
 			break;
 		}
 		result[size - 1] = c;
@@ -149,12 +156,11 @@ int config_key_match(char *s, char *k) {
 }
 
 char *config_get_string(char *s) {
-	int size = 0;
+	//int size = 0;
 	char *result;
 	while (*s++ != '=');
 	
-	while (s[size++] != '\0');
-	result = malloc(size);
+	result = malloc(strlen(s));
 	strcpy(result, s);
 	
 	return result;
@@ -190,7 +196,29 @@ int parse_metadata() {
 			config_get_version(line, '=', &packager.version);
 			packager.mdlen++;
 		}
-		// Optional metadata (TODO)
+		// Optional metadata
+		else if (config_key_match(line, "description")) {
+			packager.description = config_get_string(line);
+			packager.mdlen++;
+		} else if (config_key_match(line, "dependencies")) {
+			// A bit more complicated
+			//
+			// TODO
+			//
+			// packager.mdlen++;
+		} else if (config_key_match(line, "author")) {
+			packager.author = config_get_string(line);
+			packager.mdlen++;
+		} else if (config_key_match(line, "maintainer")) {
+			packager.maintainer = config_get_string(line);
+			packager.mdlen++;
+		} else if (config_key_match(line, "copyright")) {
+			packager.copyright = config_get_string(line);
+			packager.mdlen++;
+		} else if (config_key_match(line, "infourl")) {
+			packager.infourl = config_get_string(line);
+			packager.mdlen++;
+		}
 		
 		done = *line == '\0';
 		free(line);
@@ -423,7 +451,7 @@ void printMetadata(FILE *inputPackage) {
 					printf("Author: ");
 					printBytes(inputPackage, len);
 					break;
-				case KEY_PKG_MAINTENER:
+				case KEY_PKG_MAINTAINER:
 					printf("Maintainer: ");
 					printBytes(inputPackage, len);
 					break;

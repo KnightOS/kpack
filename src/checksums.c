@@ -6,7 +6,7 @@ uint16_t calculateCRC16(FILE *in) {
 	int b, c, backupSize = ftell(in);
     
 	fseek(in, 0, SEEK_SET);
-    
+	
 	while ((c = fgetc(in)) != EOF) {
 		for(b = 0; b < 8; b++) {
 			if ((crcVal >> 15) ^ (c >> 7)) {
@@ -15,6 +15,7 @@ uint16_t calculateCRC16(FILE *in) {
 				crcVal <<= 1;
 			}
             c <<= 1;
+			c &= 0xff;
 		}
 	}
 	

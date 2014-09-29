@@ -57,7 +57,7 @@ void unpack(FILE *file, const char *root) {
 	for (i = 0; i < fileslen; ++i) {
 		uint8_t pathlen = 0;
 		fread(&pathlen, sizeof(uint8_t), 1, file);
-		char *path = malloc(pathlen);
+		char *path = calloc(pathlen, sizeof(char));
 		fread(path, sizeof(uint8_t), pathlen, file);
 		printf("Extracting %s...\n", path);
 		uint8_t compression;
@@ -68,7 +68,7 @@ void unpack(FILE *file, const char *root) {
 		//compressedlen = fgetc(file) | (fgetc(file) << 8) | (fgetc(file) << 16);
 		fseek(file, 3, SEEK_CUR);
 		/* Get the path for mkpath */
-		char *dir = malloc(strlen(path) + 1);
+		char *dir = calloc(strlen(path) + 1, sizeof(char));
 		strcpy(dir, path);
 		int i;
 		for (i = strlen(dir); i >= 0; --i) {
@@ -77,16 +77,16 @@ void unpack(FILE *file, const char *root) {
 				break;
 			}
 		}
-		char *outpath = malloc(strlen(dir) + strlen(root) + 1);
+		char *outpath = calloc(strlen(dir) + strlen(root) + 1, sizeof(char));
 		strcpy(outpath, root);
 		strcat(outpath, dir);
 		free(dir);
 		mkpath(outpath);
 		/* Write the file */
-		char *base = malloc(strlen(path));
+		char *base = calloc(strlen(path), sizeof(char));
 		strcpy(base, path);
 		base = basename(base);
-		char *outfile = malloc(strlen(outpath) + strlen(base) + 2);
+		char *outfile = calloc(strlen(outpath) + strlen(base) + 2, sizeof(char));
 		strcpy(outfile, outpath);
 		outfile[strlen(outpath)] = '/';
 		outfile[strlen(outpath) + 1] = '\0';

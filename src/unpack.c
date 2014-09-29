@@ -76,12 +76,12 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		long pos = ftell(file);
 		fseek(file, 0, SEEK_SET);
 		/* Make sure /var/packages/<repo>/ exists */
-		char *stubdir = malloc(strlen(root) + strlen(repo) + strlen("/var/packages/") + strlen(name) + strlen("-256.256.256.pkg"));
+		char *stubdir = malloc(strlen(root) + strlen(repo) + strlen("/var/packages/") + strlen(name) + strlen("-256.256.256.stub"));
 		strcpy(stubdir, root);
 		strcat(stubdir, "/var/packages/");
 		strcat(stubdir, repo);
 		mkpath(stubdir);
-		sprintf(stubdir + strlen(root) + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.pkg", name, major, minor, patch);
+		sprintf(stubdir + strlen(root) + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);
 		FILE *stub = fopen(stubdir, "wb");
 		if (!stub) {
 			printf("Unable to open %s for writing.\n", stubdir);

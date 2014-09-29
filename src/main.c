@@ -122,8 +122,12 @@ int main(int argc, char **argv) {
 			if (!inputPackage) {
 				printf("Unable to open %s for reading.\n", packager.filename);
 			} else {
+				if (packager.rootName[strlen(packager.rootName) - 1] == '/') {
+					packager.rootName[strlen(packager.rootName) - 1] = '\0';
+				}
 				unpack(inputPackage, packager.rootName);
 				fclose(inputPackage);
+				printf("Extracted %s.\n", packager.filename);
 			}
 		}
 	}

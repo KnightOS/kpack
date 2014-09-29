@@ -1,10 +1,39 @@
 #include "unpack.h"
+#include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <libgen.h>
 
-void unpack(FILE *file, char *root) {
+void mkpath(const char *_path) {
+	char *path = malloc(strlen(_path));
+	strcpy(path, _path);
+	char *slash = path;
+	char backup;
+	while (slash && *slash) {
+		slash = strstr(slash, "/");
+		if (slash != NULL) {
+			backup = slash[1];
+			slash[1] = '\0';
+		}
+		if (0 != mkdir(path, S_IRWXU)) {
+			if (errno != EEXIST) {
+				printf("Unable to create %s\n", path);
+				exit(1);
+			}
+		}
+		if (slash) {
+			slash[1] = backup;
+			slash++;
+		}
+	}
+	free(path);
+}
+
+void unpack(FILE *file, const char *root) {
 	char magic[5] = { 0 };
 	fread(magic, sizeof(char), sizeof(magic) / sizeof(char), file);
 	if (strcmp(magic, "KPKG")) {
@@ -31,6 +60,72 @@ void unpack(FILE *file, char *root) {
 		char *path = malloc(pathlen);
 		fread(path, sizeof(uint8_t), pathlen, file);
 		printf("Extracting %s...\n", path);
-		exit(1);
+		uint8_t compression;
+		fread(&compression, sizeof(uint8_t), 1, file);
+		uint32_t uncompressedlen = 0;
+		//uint32_t compressedlen = 0;
+		uncompressedlen = fgetc(file) | (fgetc(file) << 8) | (fgetc(file) << 16);
+		//compressedlen = fgetc(file) | (fgetc(file) << 8) | (fgetc(file) << 16);
+		fseek(file, 3, SEEK_CUR);
+		/* Get the path for mkpath */
+		char *dir = malloc(strlen(path) + 1);
+		strcpy(dir, path);
+		int i;
+		for (i = strlen(dir); i >= 0; --i) {
+			if (dir[i] == '/') {
+				dir[i] = '\0';
+				break;
+			}
+		}
+		char *outpath = malloc(strlen(dir) + strlen(root) + 1);
+		strcpy(outpath, root);
+		strcat(outpath, dir);
+		free(dir);
+		mkpath(outpath);
+		/* Write the file */
+		char *base = malloc(strlen(path));
+		strcpy(base, path);
+		base = basename(base);
+		char *outfile = malloc(strlen(outpath) + strlen(base) + 2);
+		strcpy(outfile, outpath);
+		outfile[strlen(outpath)] = '/';
+		outfile[strlen(outpath) + 1] = '\0';
+		strcat(outfile, base);
+		FILE *output = fopen(outfile, "wb");
+		if (!output) {
+			printf("Unable to open %s for writing.\n", outfile);
+			exit(1);
+		}
+		free(outpath);
+		free(outfile);
+		char *buffer = malloc(256);
+		/* TODO: Compression */
+		while (uncompressedlen > 0) {
+			size_t len = uncompressedlen;
+			if (len > 256) {
+				len = 256;
+			}
+			len = fread(buffer, sizeof(char), len, file);
+			fwrite(buffer, sizeof(char), len, output);
+			uncompressedlen -= len;
+		}
+		fclose(output);
+		free(buffer);
+		/* Checksum */
+		uint8_t sumtype = 0;
+		fread(&sumtype, sizeof(uint8_t), 1, file);
+		if (sumtype == SUM_NONE) {
+			/* nop */
+		} else if (sumtype == SUM_CRC16) {
+			fseek(file, 2, SEEK_CUR); /* TODO */
+		} else if(sumtype == SUM_MD5) {
+			fseek(file, 16, SEEK_CUR); /* TODO */
+		} else if(sumtype == SUM_SHA1) {
+			fseek(file, 20, SEEK_CUR); /* TODO */
+		} else {
+			printf("Error: unknown checksum type %02X.\n", sumtype);
+			exit(1);
+		}
+		free(path);
 	}
 }

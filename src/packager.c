@@ -11,7 +11,7 @@ void initRuntime() {
 	packager.rootName = NULL;
 	packager.mdlen = 0;
 	packager.compressionType = COMPRESSION_NONE;
-	packager.sumType = SUM_NONE;
+	packager.sumType = SUM_CRC16;
 	packager.flen = 0;
 	packager.output = NULL;
 	/* required metadata */

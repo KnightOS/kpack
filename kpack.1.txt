@@ -29,6 +29,10 @@ Options
 *-c, \--config* <config>::
 	Specifies an alternate config file.
 
+*-i, \--info*::
+	Instead of packing or unpacking, instead list metadata included in the
+	package.
+
 *-x, \--compressor* <compressor>::
 	Specifies the compressor to use. Valid options are "pucrunch", "rle", and
 	"none". The default is pucrunch.

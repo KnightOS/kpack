@@ -35,7 +35,8 @@ Options
 
 *-s, \--stubs*::
 	Instructs kpack, when extracting packages, to create a package stub for the
-	extracted package.
+	extracted package. Specifying -s will also instruct kpack to omit the /include
+	directory when extracting the package.
 
 *-k, \--sum* <checksum>::
 	Specifies a checksum algorithm to use. Valid options are "crc16", "sha1",

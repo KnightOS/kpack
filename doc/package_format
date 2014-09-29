@@ -69,9 +69,7 @@ The following keys are currently included in this specification:
 - KEY_PKG_AUTHOR (0x05): The author of this software, as an ASCII string.
 - KEY_PKG_MAINTAINER (0x06): The author of the package (may be different from the author of the
   software), as an ASCII string.
-- KEY_PKG_COPYRIGHT (0x07): The license name or copyright, as an ASCII string. Packagers are
-  encouraged to include the full license text as a file and install it to
-  /share/licenses/<package name> (see "Licenses" below).
+- KEY_PKG_COPYRIGHT (0x07): The license name or copyright, as an ASCII string.
 - KEY_INFO_URL (0x08): The fully qualified URL where information about this package may be
   obtained, usually the source code or documentation.
 
@@ -112,26 +110,6 @@ This is the last section included in the package.
 After install, a package stub is created in /var/packages/stubs/ that takes this format:
 
 1. The metadata from the original package
-2. The file list, less the file contents
+2. The file list, less the file contents (just the PLEN and PATH fields)
 
 The information in the stub is sufficient to uninstall packages.
-
-## Licenses
-
-When licensing your package, please include your license in the package as
-/share/licenses/common/LICENSENAME. A few common license names are listed here:
-
-- MIT_X11
-- MS_PL
-- WTFPL
-- GPLv1
-- GPLv2
-- GPLv3
-- APACHE
-- PROPRIETARY_DO_NOT_DISTRIBUTE
-- PROPRIETARY_DISTRIBUTABLE
-
-If you use one of the listed licenses, please name your license file as listed above and populate
-it with project-ambiguous information (see templates online at <http://knightos.org>). In your
-package, please include a symlink from /share/licenses/packagename to the license in the common
-directory.

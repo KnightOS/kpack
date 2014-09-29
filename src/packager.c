@@ -5,13 +5,14 @@ void initRuntime() {
 	packager.config = NULL;
 	packager.configName = NULL;
 	packager.pack = 1;
+	packager.stub = 0;
 	packager.printMeta = 0;
 	packager.fileNb = 0;
 	packager.filename = NULL;
 	packager.rootName = NULL;
 	packager.mdlen = 0;
 	packager.compressionType = COMPRESSION_NONE;
-	packager.sumType = SUM_NONE;
+	packager.sumType = SUM_CRC16;
 	packager.flen = 0;
 	packager.output = NULL;
 	/* required metadata */
@@ -44,13 +45,15 @@ int parse_args(int argc, char **argv) {
 			packager.configName = argv[i];
 		} else if (match_option("-e", "--extract")) {
 			packager.pack = 0;
+		} else if (match_option("-s", "--stub")) {
+			packager.stub = 1;
 		} else if (match_option("-h", "--help")) {
 			displayUsage();
 			return 1;
 		} else if (match_option("-i", "--info")) {
 			packager.pack = 0;
 			packager.printMeta = 1;
-		} else if (match_option("-s", "--sum")) {
+		} else if (match_option("-k", "--sum")) {
 			i++;
 			if (strcmp(argv[i], "crc16") == 0) {
 				packager.sumType = SUM_CRC16;

@@ -389,21 +389,21 @@ inline void printBytes(FILE *in, int l) {
 	for (; l > 0; l--) {
 		printf("%c", fgetc(in));
 	}
-	printf("\n");
 }
 
 inline void printVersion(FILE *in) {
 	versionData holder;
 	holder.major = fgetc(in);
 	holder.minor = fgetc(in);
-	printf("Version: %d.%d.%d\n", holder.major, holder.minor, fgetc(in));
+	printf("%d.%d.%d", holder.major, holder.minor, fgetc(in));
 }
 
 void printMetadata(FILE *inputPackage) {
 	int i, j, nbMeta;
 	int key, len;
 	// Used to print package dependencies
-	int pkgnb, included, nlen;
+	int pkgnb, nlen;
+	versionData depVersion;
 	// Generic package testing
 	char magic[5] = { 0 };
 	
@@ -425,52 +425,59 @@ void printMetadata(FILE *inputPackage) {
 			
 			switch(key) {
 				case KEY_PKG_NAME:
-					printf("Name: ");
+					printf("name=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_PKG_REPO:
-					printf("Repository: ");
+					printf("repo=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_PKG_DESCRIPTION:
-					printf("Description: ");
+					printf("description=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_PKG_DEPS:
 					pkgnb = fgetc(inputPackage);
-					printf("Dependencies: %d\n", pkgnb);
-					
+					printf("dependencies=");
 					for (j = 0; j < pkgnb; j++) {
-						included = fgetc(inputPackage);
-						printf("  ");
-						printVersion(inputPackage);
+						depVersion.major = fgetc(inputPackage);
+						depVersion.minor = fgetc(inputPackage);
+						depVersion.patch = fgetc(inputPackage);
 						nlen = fgetc(inputPackage);
-						printf("  Name: ");
 						printBytes(inputPackage, nlen);
-						printf(included ? "Present packages includes this dependency.\n" : "Present packages does not include this dependency.\n");
+						printf(":%d.%d.%d ", depVersion.major, depVersion.minor, depVersion.patch);
 					}
 					break;
 				case KEY_PKG_VERSION:
+					printf("version=");
 					printVersion(inputPackage);
+					printf("\n");
 					break;
 				case KEY_PKG_AUTHOR:
-					printf("Author: ");
+					printf("author=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_PKG_MAINTAINER:
-					printf("Maintainer: ");
+					printf("maintainer=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_PKG_COPYRIGHT:
-					printf("License: ");
+					printf("copyright=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				case KEY_INFO_URL:
-					printf("More info on: ");
+					printf("infourl=");
 					printBytes(inputPackage, len);
+					printf("\n");
 					break;
 				default:
-					printf("Unknown meta field encountered: 0x%02X", key);
+					printf("Unknown meta field encountered: 0x%02X\n", key);
 					break;
 			}
 		}

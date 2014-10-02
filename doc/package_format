@@ -47,15 +47,16 @@ The following keys are currently included in this specification:
 - KEY_PKG_DESCRIPTION (0x02): An ASCII string with the user-friendly package description
 - KEY_PKG_DEPS (0x03): Lists packages that this package depends on:
   
-  +-----+-----+=========+------+======+
-  | LEN | INC | VERSION | NLEN | NAME | (more-->)
-  +-----+-----+=========+------+======+
+  +-----+=========+------+======+
+  | LEN | VERSION | NLEN | NAME | (more-->)
+  +-----+=========+------+======+
 
   LEN is the total number of packages that this package depends on. The packager may choose
-  to include additional packages in this same package file, to fulfill its dependencies. If
-  the listed dependency is included in this package file, INC will be 1, or otherwise 0. Each
+  to include additional packages in this same package file, to fulfill its dependencies.Each
   dependency is then listed with its full name (i.e. "core/corelib"), prefixed by the length
-  NLEN. VERSION is the minimum version of this package required, as described below:
+  NLEN. VERSION is the minimum version of this package required, as described below in the 
+  specification for KEY_PKG_VERSION. If the version is set to 0.0.0, it is assumed that any
+  version is acceptable.
 
 - KEY_PKG_VERSION (0x04): The package version takes the form of:
   

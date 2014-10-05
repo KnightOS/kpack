@@ -30,7 +30,8 @@ comments by starting a line with #.
 **repo**::
 	The package repository. The following repositories are tracked upstream:
 
-	* _core_: Core KnightOS packages, installed by default
+	* _core_: Packages required for system function
+	* _extra_: Extra packages from KnightOS developers
 	* _community_: Packages written by the community at large
 	* _ports_: Software ported from other platforms
 

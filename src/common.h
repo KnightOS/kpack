@@ -18,7 +18,6 @@ typedef struct {
 } versionData;
 
 typedef struct {
-	int included;
 	versionData version;
 	uint8_t nameLength;
 	char *name;

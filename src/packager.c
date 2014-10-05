@@ -172,15 +172,32 @@ char *config_get_string(char *s) {
 	return result;
 }
 
-inline void config_get_version(char *s, char delimiter, versionData *v) {
-	while (*s++ != delimiter);
-	sscanf(s, "%hhu.%hhu.%hhu", &v->major, &v->minor, &v->patch);
+inline int config_get_version(char *s, char delimiter, versionData *v) {
+	while (*s != delimiter && *s != ' ' && *s != '\0') {
+		s++;
+	}
+	if (*s == delimiter) {
+		s++;
+		sscanf(s, "%hhu.%hhu.%hhu", &v->major, &v->minor, &v->patch);
+		return 0;
+	} else {
+		v->major = v->minor = v->patch = -1;
+		return 1;
+	}
+}
+
+inline void skipSpaces_string(char **s) {
+	while (**s == ' ') {
+		(*s)++;
+	}
 }
 
 int parse_metadata() {
 	int returnV = 0;
 	int done = 0;
+	char *depStringBase, *depString, *depName;
 	char *line;
+	int nlen, i;
 	
 	do {
 		do {
@@ -208,10 +225,48 @@ int parse_metadata() {
 			packager.mdlen++;
 		} else if (config_key_match(line, "dependencies")) {
 			// A bit more complicated
-			//
-			// TODO
-			//
-			// packager.mdlen++;
+			// A dependency option has the following format
+			// dependencies=path/to/lib[:major.minor.patch] path/to/otherlib[:major.minor.patch]
+			depStringBase = depString = depName = config_get_string(line);
+			do {
+				if (!packager.depsNb) {
+					packager.deps = malloc(sizeof(*packager.deps));
+					packager.deps[0] = malloc(sizeof(packageDependency));
+				} else {
+					packager.deps = realloc(packager.deps, sizeof(*packager.deps) * (packager.depsNb + 1));
+					packager.deps[packager.depsNb] = malloc(sizeof(packageDependency));
+				}
+				nlen = 0;
+				skipSpaces_string(&depName);
+				while (*depName != ' ' && *depName != ':' && *depName != '\0') {
+					nlen++;
+					depName++;
+				}
+				if (depName == depString) {
+					printf("Invalid dependencies specification format.\n");
+					free(line);
+					free(depStringBase);
+					for (i = 0; i < packager.depsNb; i++) {
+						free(packager.deps[i]);
+					}
+					free(packager.deps);
+					packager.deps = NULL;
+					return 1;
+				}
+				if(*depName == ':') {
+					config_get_version(depString, ':', &packager.deps[packager.depsNb]->version);
+				} else {
+					packager.deps[packager.depsNb]->version.major = packager.deps[packager.depsNb]->version.minor = packager.deps[packager.depsNb]->version.patch = 0;
+				}
+				depName = depString;
+				packager.deps[packager.depsNb]->nameLength = nlen;
+				packager.deps[packager.depsNb]->name = malloc(nlen + 1);
+				memcpy(packager.deps[packager.depsNb]->name, depName, nlen);
+				packager.deps[packager.depsNb]->name[nlen] = '\0';
+				depString = strchr(depString, ' ');
+				packager.depsNb++;
+			} while (depString && *depString++ == ' ');
+			free(depStringBase);
 		} else if (config_key_match(line, "author")) {
 			packager.author = config_get_string(line);
 			packager.mdlen++;
@@ -440,7 +495,7 @@ void printMetadata(FILE *inputPackage) {
 					printf("\n");
 					break;
 				case KEY_PKG_DEPS:
-					pkgnb = fgetc(inputPackage);
+					pkgnb = len;
 					printf("dependencies=");
 					for (j = 0; j < pkgnb; j++) {
 						depVersion.major = fgetc(inputPackage);
@@ -450,6 +505,7 @@ void printMetadata(FILE *inputPackage) {
 						printBytes(inputPackage, nlen);
 						printf(":%d.%d.%d ", depVersion.major, depVersion.minor, depVersion.patch);
 					}
+					printf("\n");
 					break;
 				case KEY_PKG_VERSION:
 					printf("version=");

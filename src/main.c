@@ -146,6 +146,25 @@ int main(int argc, char **argv) {
 			fputs(packager.infourl, packager.output);
 			free(packager.infourl);
 		}
+		// Package dependencies
+		if(packager.dependencies_len != 0) {
+			fputc(KEY_PKG_DEPS, packager.output);
+			int len = 1;
+			int i;
+			for (i = 0; i < packager.dependencies_len; ++i) {
+				len += 4;
+				len += strlen(packager.dependencies[i]->name);
+			}
+			fputc(len, packager.output);
+			fputc(packager.dependencies_len, packager.output);
+			for (i = 0; i < packager.dependencies_len; ++i) {
+				fputc(packager.dependencies[i]->version.major, packager.output);
+				fputc(packager.dependencies[i]->version.minor, packager.output);
+				fputc(packager.dependencies[i]->version.patch, packager.output);
+				fputc(strlen(packager.dependencies[i]->name), packager.output);
+				fputs(packager.dependencies[i]->name, packager.output);
+			}
+		}
 		
 		// Write files
 		rootDir = opendir(packager.rootName);

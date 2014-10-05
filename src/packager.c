@@ -21,8 +21,8 @@ void initRuntime() {
 	packager.version.major = packager.version.minor = packager.version.patch = -1;
 	/* optional metadata */
 	packager.description = NULL;
-	packager.depsNb = 0;
-	packager.deps = NULL;
+	packager.dependencies_len = 0;
+	packager.dependencies = malloc(sizeof(packageDependency*) * 128);
 	packager.author = NULL;
 	packager.maintainer = NULL;
 	packager.infourl = NULL;
@@ -208,10 +208,32 @@ int parse_metadata() {
 			packager.mdlen++;
 		} else if (config_key_match(line, "dependencies")) {
 			// A bit more complicated
-			//
-			// TODO
-			//
-			// packager.mdlen++;
+			packager.mdlen++;
+			char *deplist = config_get_string(line);
+			int i, j = 0;
+			for (i = 0; 1; ++i) {
+				if (deplist[i] == ' ' || deplist[i] == '\0') {
+					char *dep = malloc(i - j);
+					strcpy(dep, deplist + j);
+					dep[i - j] = '\0';
+					printf("'%s'\n", dep);
+					j = i + 1;
+					versionData *version = malloc(sizeof(version));
+					version->major = version->minor = version->patch = 0;
+					if (strchr(dep, ':') != NULL) {
+						config_get_version(dep, ':', version);
+						*strchr(dep, ':') = '\0';
+					}
+					packageDependency *depv = malloc(sizeof(packageDependency));
+					depv->version = *version;
+					depv->name = dep;
+					packager.dependencies[packager.dependencies_len] = depv;
+					packager.dependencies_len++;
+				}
+				if (deplist[i] == '\0') {
+					break;
+				}
+			}
 		} else if (config_key_match(line, "author")) {
 			packager.author = config_get_string(line);
 			packager.mdlen++;
@@ -448,7 +470,17 @@ void printMetadata(FILE *inputPackage) {
 						depVersion.patch = fgetc(inputPackage);
 						nlen = fgetc(inputPackage);
 						printBytes(inputPackage, nlen);
-						printf(":%d.%d.%d ", depVersion.major, depVersion.minor, depVersion.patch);
+						if (depVersion.major != 0 || depVersion.minor != 0 || depVersion.patch != 0) {
+							if (j == pkgnb - 1) {
+								printf(":%d.%d.%d", depVersion.major, depVersion.minor, depVersion.patch);
+							} else {
+								printf(":%d.%d.%d ", depVersion.major, depVersion.minor, depVersion.patch);
+							}
+						} else {
+							if (j != pkgnb - 1) {
+								printf(" ");
+							}
+						}
 					}
 					break;
 				case KEY_PKG_VERSION:

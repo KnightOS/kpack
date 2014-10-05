@@ -18,9 +18,7 @@ typedef struct {
 } versionData;
 
 typedef struct {
-	int included;
 	versionData version;
-	uint8_t nameLength;
 	char *name;
 } packageDependency;
 
@@ -42,8 +40,8 @@ struct {
 	char *repo;
 	versionData version;
 	char *description;
-	int depsNb;
-	packageDependency **deps;
+	int dependencies_len;
+	packageDependency **dependencies;
 	char *author;
 	char *maintainer;
 	char *infourl;

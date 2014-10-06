@@ -99,7 +99,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 	for (i = 0; i < fileslen; ++i) {
 		uint8_t pathlen = 0;
 		fread(&pathlen, sizeof(uint8_t), 1, file);
-		char *path = calloc(pathlen, sizeof(char));
+		char *path = calloc(pathlen + 1, sizeof(char));
 		fread(path, sizeof(uint8_t), pathlen, file);
 		if (write_stub) {
 			/* Copy file header to stub */

@@ -73,6 +73,21 @@ The following keys are currently included in this specification:
 - KEY_PKG_COPYRIGHT (0x07): The license name or copyright, as an ASCII string.
 - KEY_INFO_URL (0x08): The fully qualified URL where information about this package may be
   obtained, usually the source code or documentation.
+- KEY_CAPABILITIES (0x09): Describes any device capabilities this package requires. For
+  example, this package may require USB support. The format of this field is loosely specified -
+  there are just a list of strings provided in the config here.
+
+  +-----+------+======+
+  | LEN | NLEN | NAME | (more-->)
+  +-----+------+======+
+
+  LEN is the number of requirements. NLEN is the length of each requirement, which is followed
+  by the requirement string. The following requirements are formally defined:
+
+  - "color": Requires a color display
+  - "usb": Requires a USB port
+  - "clock": Requires a real-time clock
+  - "extra_ram": Requires 8 pages of RAM
 
 Prepending KEY_PKG_REPO to KEY_PKG_NAME gives you the full name of the package
 (i.e. "core/corelib").
@@ -108,7 +123,7 @@ This is the last section included in the package.
 
 ## Packages after install
 
-After install, a package stub is created in /var/packages/stubs/ that takes this format:
+After install, a package stub is created in /var/packages/ that takes this format:
 
 1. The metadata from the original package
 2. The file list, less the file contents (just the PLEN and PATH fields)

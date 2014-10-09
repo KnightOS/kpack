@@ -42,6 +42,26 @@ comments by starting a line with #.
 **description** (optional)::
 	A user-friendly description of this package.
 
+**dependencies** (optional)::
+	A list of packages that this package depends on. These should be fully
+	qualified package names, seperated by spaces. You may optionally incldue a
+	minimum required version. Example:
+
+	dependencies=corelib kpm:1.0.0
+
+**capabilities** (optional)::
+	Lists capabilities required of the target device. For example, you might
+	require USB support. Seperate each with spaces. Example:
+
+	capabilities=usb color
+
+	The following capabilities are formally defined and supported by kpm:
+
+	* _color_: Requires a color display
+	* _usb_: Requires USB support
+	* _clock_: Requires a real-time clock
+	* _extraram_: Requires at least 8 pages of RAM
+
 **author** (optional)::
 	The person who originally wrote this software. The suggested format of this
 	field is **Author Name <author email>** (i.e. **Drew DeVault <sir@cmpwn.com>**).

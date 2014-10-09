@@ -87,7 +87,7 @@ The following keys are currently included in this specification:
   - "color": Requires a color display
   - "usb": Requires a USB port
   - "clock": Requires a real-time clock
-  - "extra_ram": Requires 8 pages of RAM
+  - "extraram": Requires 8 pages of RAM
 
 Prepending KEY_PKG_REPO to KEY_PKG_NAME gives you the full name of the package
 (i.e. "core/corelib").

@@ -192,6 +192,7 @@ int main(int argc, char **argv) {
 			} else {
 				printMetadata(inputPackage);
 				fclose(inputPackage);
+				printf("\n");
 			}
 		} else {
 			// We're unpacking

@@ -11,8 +11,13 @@ add_executable(kpack
     src/unpack.c
 )
 
-install(PROGRAMS bin/kpack
-    DESTINATION bin)
+if(WIN32)
+  install(PROGRAMS bin/kpack.exe
+      DESTINATION bin)
+else()
+  install(PROGRAMS bin/kpack
+      DESTINATION bin)
+endif()
 
 set(CMAKE_BUILD_TYPE Release)
 

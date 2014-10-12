@@ -11,7 +11,7 @@ add_executable(kpack
     src/unpack.c
 )
 
-if(WIN32)
+if(WIN32 OR CYGWIN)
   install(PROGRAMS bin/kpack.exe
       DESTINATION bin)
 else()

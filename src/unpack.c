@@ -9,7 +9,7 @@
 #include <libgen.h>
 
 void mkpath(const char *_path) {
-	char *path = malloc(strlen(_path));
+	char *path = malloc(strlen(_path) + 1);
 	strcpy(path, _path);
 	char *slash = path;
 	char backup;
@@ -79,7 +79,11 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		long pos = ftell(file);
 		fseek(file, 0, SEEK_SET);
 		/* Make sure /var/packages/<repo>/ exists */
-		char *stubdir = malloc(strlen(root) + strlen(repo) + strlen("/var/packages/") + strlen(name) + strlen("-256.256.256.stub"));
+		char *stubdir = malloc(strlen(root) +
+			strlen(repo) +
+			strlen("/var/packages/") +
+			strlen(name) +
+			strlen("-256.256.256.stub"));
 		strcpy(stubdir, root);
 		strcat(stubdir, "/var/packages/");
 		strcat(stubdir, repo);

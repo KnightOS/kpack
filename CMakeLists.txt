@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(mkpkg C)
-set(CMAKE_CXX_FLAGS "-g")
+set(CMAKE_C_FLAGS "-g")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 add_definitions("-Wall")
 

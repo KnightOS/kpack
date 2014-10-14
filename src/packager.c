@@ -166,7 +166,7 @@ char *config_get_string(char *s) {
 	char *result;
 	while (*s++ != '=');
 	
-	result = malloc(strlen(s));
+	result = malloc(strlen(s) + 1);
 	strcpy(result, s);
 	
 	return result;
@@ -213,7 +213,7 @@ int parse_metadata() {
 			int i, j = 0;
 			for (i = 0; 1; ++i) {
 				if (deplist[i] == ' ' || deplist[i] == '\0') {
-					char *dep = malloc(i - j);
+					char *dep = malloc(strlen(deplist));
 					strcpy(dep, deplist + j);
 					dep[i - j] = '\0';
 					j = i + 1;
@@ -353,7 +353,7 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
 			rfilename = malloc(rfilenameL * sizeof(char));
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
-			char *relpath = malloc(strlen(rfilename) - strlen(top));
+			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
 			strcpy(relpath, rfilename + strlen(top));
 			printf("Adding %s...\n", relpath);
 			writeFileToPackage(rfilename, relpath);

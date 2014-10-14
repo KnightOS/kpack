@@ -216,7 +216,6 @@ int parse_metadata() {
 					char *dep = malloc(i - j);
 					strcpy(dep, deplist + j);
 					dep[i - j] = '\0';
-					printf("'%s'\n", dep);
 					j = i + 1;
 					versionData *version = malloc(sizeof(version));
 					version->major = version->minor = version->patch = 0;

@@ -8,23 +8,28 @@
 #include <errno.h>
 #include <libgen.h>
 
-void mkpath(const char *_path) {
-	char *path = malloc(strlen(_path) + 1);
+void mkpath(const char *root, const char *_path) {
+	char *path = malloc(strlen(_path));
 	strcpy(path, _path);
 	char *slash = path;
 	char backup;
+	char *fullPath;
 	while (slash && *slash) {
-		slash = strstr(slash, "/");
+		slash = strchr(slash, '/');
 		if (slash != NULL) {
 			backup = slash[1];
 			slash[1] = '\0';
 		}
-		if (0 != mkdir(path, S_IRWXU)) {
+		fullPath = malloc(strlen(root) + strlen(path) + 1);
+		strcpy(fullPath, root);
+		strcat(fullPath, path);
+		if (0 != mkdir(fullPath, S_IRWXU)) {
 			if (errno != EEXIST) {
-				printf("Unable to create %s\n", path);
+				printf("Unable to create %s\n", fullPath);
 				exit(1);
 			}
 		}
+		free(fullPath);
 		if (slash) {
 			slash[1] = backup;
 			slash++;
@@ -69,7 +74,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		}
 	}
 	if (name == NULL || repo == NULL || major == -1) {
-		printf("Error: invalid package (name, repo, and version is all required.");
+		printf("Error: invalid package (name, repo, and version are all required).");
 		exit(1);
 	}
 	printf("Extracting %s/%s:%d.%d.%d to %s\n", repo, name, major, minor, patch, root);
@@ -79,22 +84,25 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		long pos = ftell(file);
 		fseek(file, 0, SEEK_SET);
 		/* Make sure /var/packages/<repo>/ exists */
-		char *stubdir = malloc(strlen(root) +
+		char *stubdir = malloc(
 			strlen(repo) +
 			strlen("/var/packages/") +
 			strlen(name) +
 			strlen("-256.256.256.stub"));
-		strcpy(stubdir, root);
-		strcat(stubdir, "/var/packages/");
+		strcpy(stubdir, "var/packages/");
 		strcat(stubdir, repo);
-		mkpath(stubdir);
-		sprintf(stubdir + strlen(root) + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);
-		stub = fopen(stubdir, "wb");
+		mkpath(root, stubdir);
+		sprintf(stubdir + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);
+		char *fullpath = malloc(strlen(root) + strlen(stubdir));
+		strcpy(fullpath, root);
+		strcat(fullpath, stubdir);
+		stub = fopen(fullpath, "wb");
 		if (!stub) {
-			printf("Unable to open %s for writing.\n", stubdir);
+			printf("Unable to open %s for writing.\n", fullpath);
 			exit(1);
 		}
 		free(stubdir);
+		free(fullpath);
 		char *buffer = malloc(pos);
 		fread(buffer, sizeof(uint8_t), pos, file);
 		fwrite(buffer, sizeof(uint8_t), pos, stub);
@@ -127,8 +135,8 @@ void unpack(FILE *file, const char *root, int write_stub) {
 				break;
 			}
 		}
-		char *outpath = calloc(strlen(dir) + strlen(root) + 1, sizeof(char));
-		strcpy(outpath, root);
+		char *outpath = calloc(strlen(dir) + 1, sizeof(char));
+		strcpy(outpath, dir);
 		int skip = 0;
 		if (write_stub && strstr(dir, "/include") == dir) {
 			skip = 1;
@@ -136,19 +144,19 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		} else {
 			printf("Extracting %s...\n", path);
 		}
-		strcat(outpath, dir);
 		free(dir);
 		if (!skip) {
-			mkpath(outpath);
+			mkpath(root, outpath);
 		}
 		/* Write the file */
 		char *base = calloc(strlen(path), sizeof(char));
 		strcpy(base, path);
 		base = basename(base);
-		char *outfile = calloc(strlen(outpath) + strlen(base) + 2, sizeof(char));
-		strcpy(outfile, outpath);
-		outfile[strlen(outpath)] = '/';
-		outfile[strlen(outpath) + 1] = '\0';
+		char *outfile = calloc(strlen(root) + strlen(outpath) + strlen(base) + 2, sizeof(char));
+		strcpy(outfile, root);
+		strcat(outfile, outpath);
+		outfile[strlen(root) + strlen(outpath)] = '/';
+		outfile[strlen(root) + strlen(outpath) + 1] = '\0';
 		strcat(outfile, base);
 		if (!skip) {
 			FILE *output = fopen(outfile, "wb");

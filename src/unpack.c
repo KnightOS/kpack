@@ -89,7 +89,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 			strlen("/var/packages/") +
 			strlen(name) +
 			strlen("-256.256.256.stub"));
-		strcpy(stubdir, "var/packages/");
+		strcpy(stubdir, "/var/packages/");
 		strcat(stubdir, repo);
 		mkpath(root, stubdir);
 		sprintf(stubdir + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);

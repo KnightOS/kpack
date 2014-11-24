@@ -350,12 +350,12 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 		if (currentEntry->d_type == DT_REG) {
 			// found a file, write it to output
 			packager.fileNb++;
-			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
+			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 2;
 			rfilename = malloc(rfilenameL * sizeof(char));
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
 			strcpy(relpath, rfilename + strlen(top));
-			printf("Adding %s...\n", relpath);
+			printf("Adding %s...\n", relpath, rfilenameL);
 			writeFileToPackage(rfilename, relpath);
 			free(rfilename);
 			currentEntry = readdir(root);

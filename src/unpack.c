@@ -144,7 +144,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		} else {
 			printf("Extracting %s...\n", path);
 		}
-		free(dir);
+		/* free(dir); */
 		if (!skip) {
 			mkpath(root, outpath);
 		}

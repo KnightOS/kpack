@@ -149,7 +149,7 @@ void unpack(FILE *file, const char *root, int write_stub) {
 			mkpath(root, outpath);
 		}
 		/* Write the file */
-		char *base = calloc(strlen(path), sizeof(char));
+		char *base = calloc(strlen(path) + 1, sizeof(char));
 		strcpy(base, path);
 		base = basename(base);
 		char *outfile = calloc(strlen(root) + strlen(outpath) + strlen(base) + 2, sizeof(char));

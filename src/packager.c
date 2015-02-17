@@ -355,7 +355,7 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
 			strcpy(relpath, rfilename + strlen(top));
-			printf("Adding %s...\n", relpath, rfilenameL);
+			printf("Adding %s...\n", relpath);
 			writeFileToPackage(rfilename, relpath);
 			free(rfilename);
 			currentEntry = readdir(root);

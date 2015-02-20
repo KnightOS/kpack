@@ -34,6 +34,12 @@ comments by starting a line with #.
 	* _extra_: Extra packages from KnightOS developers
 	* _community_: Packages written by the community at large
 	* _ports_: Software ported from other platforms
+	* _nonfree_: Software distributed under the terms of a license that has not
+	  been approved by the OSI
+
+	This only applies to the official KnightOS distribution. If you are running
+	your own distribution, then you are of course free to package software however
+	you please.
 
 **version**::
 	The current package version. This _must_ be in the format MAJOR.MINOR.PATCH.

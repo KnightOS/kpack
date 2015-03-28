@@ -138,7 +138,10 @@ void unpack(FILE *file, const char *root, int write_stub) {
 		char *outpath = calloc(strlen(dir) + 1, sizeof(char));
 		strcpy(outpath, dir);
 		int skip = 0;
-		if (write_stub && strstr(dir, "/include") == dir) {
+		if (write_stub && strstr(dir, "/include") == dir) { /* Omit include files */
+			skip = 1;
+			printf("Omitting %s.\n", path);
+		} else if (write_stub && strstr(dir, "/slib") == dir) { /* Omit static libraries */
 			skip = 1;
 			printf("Omitting %s.\n", path);
 		} else {

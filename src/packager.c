@@ -103,6 +103,11 @@ int parse_args(int argc, char **argv) {
 		return -1;
 	}
 	if (!packager.rootName && !packager.printMeta) {
+		/* if we are going to unpack then we need a target dir */
+		if(!packager.pack) {
+			printf("Invalid usage - no target directory specified for unpacking. See kpack --help.\n");
+			return -1;
+		}
 		printf("Invalid usage - no model specified. See kpack --help.\n");
 	}
 	

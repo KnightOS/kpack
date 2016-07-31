@@ -360,8 +360,15 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
 			strcpy(relpath, rfilename + strlen(top));
-			printf("Adding %s...\n", relpath);
-			writeFileToPackage(rfilename, relpath);
+
+			/* make sure we don't attempt to include the output file itself */			
+			if(!strncmp(packager.filename, (relpath + 1), strlen(packager.filename))) {
+				printf("Ignoring file %s : This is most likely your output .pkg file.\n", relpath);
+			} else {
+				printf("Adding %s...\n", relpath);
+				writeFileToPackage(rfilename, relpath);
+			}
+
 			free(rfilename);
 			currentEntry = readdir(root);
 		} else if (currentEntry->d_type == DT_DIR) {

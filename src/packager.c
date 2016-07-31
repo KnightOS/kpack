@@ -383,6 +383,10 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 				// in that case, skip it
 				currentEntry = readdir(root);
 			}
+		} else {
+			/* unknown entry, so move along!  */
+			printf("Ignoring file : %s/%s\n", rootName, currentEntry->d_name);
+			currentEntry = readdir(root);
 		}
 	}
 }

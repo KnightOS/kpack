@@ -1,5 +1,6 @@
 #include "common.h"
 #include "checksums.h"
+#include "version.h.gen"
 
 void initRuntime() {
 	packager.config = NULL;
@@ -79,6 +80,11 @@ int parse_args(int argc, char **argv) {
 				printf("Invalid compression type. See kpack --help.\n");
 				return -1;
 			}
+		} else if(match_option("-v", "--version")) {
+			printf("kpack (KnightOS) %s\n", GIT_SHORT_VERSION);
+			printf(COPYRIGHT);
+			printf(LICENSE);
+			return 1;
 		} else if (*argv[i] == '-') {
 			printf("Unknown option %s. See kpack --help for usage.\n", argv[i]);
 			return -1;

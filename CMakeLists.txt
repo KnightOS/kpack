@@ -25,6 +25,12 @@ endif()
 
 set(CMAKE_BUILD_TYPE Release)
 
+ADD_CUSTOM_TARGET(VERSION
+	COMMAND ./generate_version.sh
+)
+
+ADD_DEPENDENCIES(kpack VERSION)
+
 ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1
   COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1.txt 
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1.txt

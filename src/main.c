@@ -26,6 +26,8 @@ void displayUsage() {
 		"\t-x, --compressor\n"
 		"\t\tSpecifies the compression algorithm to use. Valid options are:\n"
 		"\t\tpucrunch, rle, none (default: none)'\n"
+		"\t-v, --version\n"
+		"\t\tPrints the current version of kpack.\n"
 	);
 }
 

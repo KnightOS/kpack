@@ -1,8 +1,11 @@
 #include <errno.h>
+#include <ftw.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "checksums.h"
 #include "version.h.gen"
+#include "packager.h"
 
 void initRuntime() {
 	packager.config = NULL;
@@ -280,8 +283,8 @@ int parse_metadata() {
 	return returnV;
 }
 
-void writeFileToPackage(char *f, char *relpath) {
-	char *filename = relpath;
+void writeFileToPackage(const char *f, const char *relpath) {
+	const char *filename = relpath;
 	uint16_t crcsum;
 	// Uncompressed then compressed size
 	int usize = 0, csize = 0, c;
@@ -356,83 +359,50 @@ void writeFileToPackage(char *f, char *relpath) {
 	}
 }
 
-void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *currentEntry) {
-	DIR *rroot;
-	struct dirent *rentry;
-	int rrootNameL;
-	char *rrootName;
-	int rfilenameL;
-	char *rfilename;
-	
-	while (currentEntry) {
-		if (currentEntry->d_type == DT_REG) {
-			// found a file, write it to output
-			packager.fileNb++;
-			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 2;
-			rfilename = malloc(rfilenameL * sizeof(char));
-			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
-			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
-			strcpy(relpath, rfilename + strlen(top));
+int processFile(const char* file, const struct stat *sb, int flag, struct FTW *s) {
+	int result;
 
-			/* make sure we don't attempt to include the output file itself */			
-			if(!strncmp(packager.filename, (relpath + 1), strlen(packager.filename))) {
-				printf("Ignoring file %s : This is most likely your output .pkg file.\n", relpath);
+	result = 0;
+	switch(flag) {
+		case FTW_F:
+			/* make sure we don't attempt to include the output file itself */
+			if(!strncmp(packager.filename, (file + 2), strlen(packager.filename))) {
+				printf("Ignoring file %s : This is most likely your output .pkg file.\n", file);
 			} else {
-				printf("Adding %s...\n", relpath);
-				writeFileToPackage(rfilename, relpath);
+				printf("Adding %s...\n", file);
+				writeFileToPackage(file, (file + 1));
+				packager.fileNb++;
 			}
+			break;
 
-			free(rfilename);
-			currentEntry = readdir(root);
-		} else if (currentEntry->d_type == DT_DIR) {
-			// found a directory, recursively explore it
-			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
-				rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
-				rrootName = malloc(rrootNameL * sizeof(char));
-				sprintf(rrootName, "%s/%s", rootName, currentEntry->d_name);
-				rroot = opendir(rrootName);
-				if(!rroot) {
-					printf("Error: couldn't open %s\n", rrootName);
-					free(rrootName);
-					exit(1);
-				} else {
-					rentry = readdir(rroot);
-					if(rentry) {
-						writeModelRecursive(rroot, rrootName, top, rentry);
-					}
-					closedir(rroot);
-					free(rrootName);
-				}
-				currentEntry = readdir(root);
-			} else {
-				// in that case, skip it
-				currentEntry = readdir(root);
-			}
-		} else {
-			/* unknown entry, so move along!  */
-			printf("Ignoring file : %s/%s\n", rootName, currentEntry->d_name);
-			currentEntry = readdir(root);
-		}
+		default: 
+			break;
 	}
+	return result;
 }
 
 void writeModel(DIR *root, char *rootName) {
 	int fileNbLocation;
-	struct dirent *currentEntry;
+	int result;
+	int numFDs;
 	
 	// Reserve one byte for the number of files
 	fileNbLocation = ftell(packager.output);
 	fputc(0, packager.output);
-	
-	currentEntry = readdir(root);
-	if(currentEntry) {	
-		writeModelRecursive(root, rootName, rootName, currentEntry);
-		fseek(packager.output, fileNbLocation, SEEK_SET);
-		fputc(packager.fileNb, packager.output);
-	} else {
-		printf("Error: %s is empty!\n", rootName);
+
+	/* allow nftw this many FDs */
+	numFDs = getdtablesize() - NUM_FDS_TO_RESERVE;
+
+	/* walk rootName looking for files to pack */
+	result = nftw(rootName, processFile, numFDs, FTW_PHYS);
+	if(result < 0) {
+		printf("Error: walked directory and this happened:\n\t%s", strerror(errno));
 		exit(1);
 	}
+	
+	/* write file number */
+	fseek(packager.output, fileNbLocation, SEEK_SET);
+	fputc(packager.fileNb, packager.output);
 }
 
 inline void printBytes(FILE *in, int l) {

@@ -1,3 +1,5 @@
+#include <errno.h>
+
 #include "common.h"
 #include "checksums.h"
 #include "version.h.gen"
@@ -346,6 +348,11 @@ void writeFileToPackage(char *f, char *relpath) {
 		//
 		// MD5 checksum
 		// directly write the thing
+	}
+
+	/* clean up input file */
+	if(in && fclose(in)) {
+		printf("Error: Closed %s and this happened:\n\t%s\n", filename, strerror(errno));
 	}
 }
 

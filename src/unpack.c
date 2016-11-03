@@ -8,6 +8,10 @@
 #include <errno.h>
 #include <libgen.h>
 
+#if (defined(_WIN32) || defined(__WIN32__))
+#define mkdir(A, B) mkdir(A)
+#endif
+
 void mkpath(const char *root, const char *_path) {
 	char *path = malloc(strlen(_path));
 	strcpy(path, _path);

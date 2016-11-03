@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "checksums.h"
@@ -186,8 +187,12 @@ char *config_get_string(char *s) {
 }
 
 inline void config_get_version(char *s, char delimiter, versionData *v) {
+	uint16_t major, minor, patch;
 	while (*s++ != delimiter);
-	sscanf(s, "%hhu.%hhu.%hhu", &v->major, &v->minor, &v->patch);
+	sscanf(s, "%hu.%hu.%hu", &major, &minor, &patch);
+	v->major = (uint8_t) major;
+	v->minor = (uint8_t) minor;
+	v->patch = (uint8_t) patch;
 }
 
 int parse_metadata() {
@@ -359,13 +364,15 @@ void writeFileToPackage(char *f, char *relpath) {
 void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *currentEntry) {
 	DIR *rroot;
 	struct dirent *rentry;
+	struct stat s;
 	int rrootNameL;
 	char *rrootName;
 	int rfilenameL;
 	char *rfilename;
 	
 	while (currentEntry) {
-		if (currentEntry->d_type == DT_REG) {
+		stat(currentEntry->d_name, &s);
+		if (S_ISREG(s.st_mode)) {
 			// found a file, write it to output
 			packager.fileNb++;
 			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 2;
@@ -384,7 +391,7 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 
 			free(rfilename);
 			currentEntry = readdir(root);
-		} else if (currentEntry->d_type == DT_DIR) {
+		} else if (S_ISDIR(s.st_mode)) {
 			// found a directory, recursively explore it
 			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
 				rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;

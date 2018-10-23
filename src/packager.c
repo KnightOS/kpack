@@ -371,16 +371,20 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 	char *rfilename;
 	
 	while (currentEntry) {
-		stat(currentEntry->d_name, &s);
+		errno = 0;
+		rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 2;
+		rfilename = malloc(rfilenameL * sizeof(char));
+		sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
+		int status = stat(rfilename, &s);
+		if (status != 0) {
+			fprintf(stderr, "Error checking file %s: %d\n", currentEntry->d_name, errno);
+			exit(1);
+		}
 		if (S_ISREG(s.st_mode)) {
 			// found a file, write it to output
 			packager.fileNb++;
-			rfilenameL = strlen(rootName) + strlen(currentEntry->d_name) + 2;
-			rfilename = malloc(rfilenameL * sizeof(char));
-			sprintf(rfilename, "%s/%s", rootName, currentEntry->d_name);
 			char *relpath = malloc((strlen(rfilename) - strlen(top)) + 1);
 			strcpy(relpath, rfilename + strlen(top));
-
 			/* make sure we don't attempt to include the output file itself */			
 			if(!strncmp(packager.filename, (relpath + 1), strlen(packager.filename))) {
 				printf("Ignoring file %s : This is most likely your output .pkg file.\n", relpath);

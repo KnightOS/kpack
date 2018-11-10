@@ -24,10 +24,15 @@ else()
 endif()
 
 set(CMAKE_BUILD_TYPE Release)
-
-ADD_CUSTOM_TARGET(VERSION
-	COMMAND ./generate_version.sh
-)
+if(WIN32)
+	ADD_CUSTOM_TARGET(VERSION
+		COMMAND ./generate_version.bat
+	)
+else()
+	ADD_CUSTOM_TARGET(VERSION
+		COMMAND ./generate_version.sh
+	)
+endif()
 
 ADD_DEPENDENCIES(kpack VERSION)
 

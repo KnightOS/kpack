@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "checksums.h"
-#include "version.h.gen"
+#include <version.h>
 
 void initRuntime() {
 	packager.config = NULL;
@@ -186,7 +186,7 @@ char *config_get_string(char *s) {
 	return result;
 }
 
-inline void config_get_version(char *s, char delimiter, versionData *v) {
+void config_get_version(char *s, char delimiter, versionData *v) {
 	uint16_t major, minor, patch;
 	while (*s++ != delimiter);
 	sscanf(s, "%hu.%hu.%hu", &major, &minor, &patch);
@@ -446,13 +446,13 @@ void writeModel(DIR *root, char *rootName) {
 	}
 }
 
-inline void printBytes(FILE *in, int l) {
+void printBytes(FILE *in, int l) {
 	for (; l > 0; l--) {
 		printf("%c", fgetc(in));
 	}
 }
 
-inline void printVersion(FILE *in) {
+void printVersion(FILE *in) {
 	versionData holder;
 	holder.major = fgetc(in);
 	holder.minor = fgetc(in);

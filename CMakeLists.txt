@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(kpack C)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 add_definitions("-Wall")
 
 if(EMSCRIPTEN)
@@ -14,43 +13,46 @@ add_executable(kpack
     src/checksums.c
     src/unpack.c
 )
+target_include_directories(kpack PRIVATE ${CMAKE_BINARY_DIR})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+find_package(Git)
 
-if(WIN32 OR CYGWIN)
-  install(PROGRAMS bin/kpack.exe
-      DESTINATION bin)
-else()
-  install(PROGRAMS bin/kpack
-      DESTINATION bin)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --dirty --always --abbrev=0
+        OUTPUT_VARIABLE GIT_SHORT_VERSION
+        ERROR_QUIET
+        )
+    if(NOT ${GIT_SHORT_VERSION} STREQUAL "")
+        string(STRIP ${GIT_SHORT_VERSION} GIT_SHORT_VERSION)
+    endif()
+    message(STATUS "Current git revision is ${GIT_SHORT_VERSION}")
 endif()
 
-set(CMAKE_BUILD_TYPE Release)
+configure_file(${CMAKE_SOURCE_DIR}/src/version.h.in ${CMAKE_BINARY_DIR}/version.h)
 
-ADD_CUSTOM_TARGET(VERSION
-	COMMAND ./generate_version.sh
-)
+install(TARGETS kpack DESTINATION bin)
 
-ADD_DEPENDENCIES(kpack VERSION)
-
-ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1
-  COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1.txt 
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/kpack.1
+  COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_SOURCE_DIR}/kpack.1.txt -D ${CMAKE_BINARY_DIR}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1.txt
 )
 
-ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/kpack.5
-  COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_CURRENT_SOURCE_DIR}/kpack.5.txt 
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/kpack.5
+  COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_SOURCE_DIR}/kpack.5.txt -D ${CMAKE_BINARY_DIR}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kpack.5.txt
 )
 
 ADD_CUSTOM_TARGET(man ALL
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kpack.5)
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/kpack.1
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/kpack.5)
 
 INSTALL(
-  FILES ${CMAKE_CURRENT_SOURCE_DIR}/kpack.1
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/kpack.1
   DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
 )
 
 INSTALL(
-  FILES ${CMAKE_CURRENT_SOURCE_DIR}/kpack.5
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/kpack.5
   DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man5
 )

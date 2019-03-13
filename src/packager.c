@@ -392,14 +392,11 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 				printf("Adding %s...\n", relpath);
 				writeFileToPackage(rfilename, relpath);
 			}
-
-			free(rfilename);
-			currentEntry = readdir(root);
 		} else if (S_ISDIR(s.st_mode)) {
 			// found a directory, recursively explore it
 			if (strcmp(currentEntry->d_name, ".") && strcmp(currentEntry->d_name, "..")) {
 				rrootNameL = strlen(rootName) + strlen(currentEntry->d_name) + 1;
-				rrootName = malloc(rrootNameL * sizeof(char));
+				rrootName = malloc(rrootNameL * sizeof(char) + 1);
 				sprintf(rrootName, "%s/%s", rootName, currentEntry->d_name);
 				rroot = opendir(rrootName);
 				if(!rroot) {
@@ -414,16 +411,13 @@ void writeModelRecursive(DIR *root, char *rootName, char* top, struct dirent *cu
 					closedir(rroot);
 					free(rrootName);
 				}
-				currentEntry = readdir(root);
-			} else {
-				// in that case, skip it
-				currentEntry = readdir(root);
 			}
 		} else {
 			/* unknown entry, so move along!  */
 			printf("Ignoring file : %s/%s\n", rootName, currentEntry->d_name);
-			currentEntry = readdir(root);
 		}
+		free(rfilename);
+		currentEntry = readdir(root);
 	}
 }
 

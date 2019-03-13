@@ -11,3 +11,4 @@ temp/
 *.1
 *.5
 src/version.h.gen
+build/

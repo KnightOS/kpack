@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(kpack C)
 add_definitions("-Wall")
+set(CMAKE_C_FLAGS_DEBUG "-g")
+
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
+endif()
 
 if(EMSCRIPTEN)
   set(CMAKE_EXE_LINKER_FLAGS "--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/module.js")

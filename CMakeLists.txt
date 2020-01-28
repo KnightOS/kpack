@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(kpack C)
-add_definitions("-Wall")
-set(CMAKE_C_FLAGS_DEBUG "-g")
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Werror")
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
@@ -19,7 +20,7 @@ add_executable(kpack
     src/unpack.c
 )
 target_include_directories(kpack PRIVATE ${CMAKE_BINARY_DIR})
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(Git)
 
 if(GIT_FOUND)
@@ -36,7 +37,7 @@ endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/src/version.h.in ${CMAKE_BINARY_DIR}/version.h)
 
-install(TARGETS kpack DESTINATION bin)
+install(TARGETS kpack DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/kpack.1
   COMMAND a2x --no-xmllint --doctype manpage --format manpage ${CMAKE_SOURCE_DIR}/kpack.1.txt -D ${CMAKE_BINARY_DIR}
@@ -53,11 +54,6 @@ ADD_CUSTOM_TARGET(man ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/kpack.5)
 
 INSTALL(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/kpack.1
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
-)
-
-INSTALL(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/kpack.5
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man5
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/kpack.1 ${CMAKE_CURRENT_BINARY_DIR}/kpack.5
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1
 )

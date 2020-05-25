@@ -2,6 +2,8 @@
 #include "packager.h"
 #include "unpack.h"
 
+packager_base packager;
+
 void displayUsage() {
 	printf(
 		"KnightOS package manager - Manipulates KnightOS software packages\n"

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INC_COM
 #define INC_COM
 
@@ -22,7 +23,7 @@ typedef struct {
 	char *name;
 } packageDependency;
 
-struct {
+typedef struct {
 	// Runtime
 	FILE *config;
 	char *configName;
@@ -52,7 +53,7 @@ struct {
 	uint8_t compressionType;
 	uint8_t sumType;
 	uint8_t flen;
-} packager;
+} packager_base;
 
 enum {
 	KEY_PKG_NAME,
@@ -80,4 +81,5 @@ enum {
 };
 
 extern void displayUsage();
+extern packager_base packager;
 #endif

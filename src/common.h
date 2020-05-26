@@ -52,7 +52,7 @@ typedef struct {
 	uint8_t compressionType;
 	uint8_t sumType;
 	uint8_t flen;
-} packager_base;
+} packagerData;
 
 enum {
 	KEY_PKG_NAME,
@@ -80,5 +80,5 @@ enum {
 };
 
 extern void displayUsage();
-extern packager_base packager;
+extern packagerData packager;
 #endif

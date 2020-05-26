@@ -2,7 +2,7 @@
 #include "packager.h"
 #include "unpack.h"
 
-packager_base packager;
+packagerData packager;
 
 void displayUsage() {
 	printf(

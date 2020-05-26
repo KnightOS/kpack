@@ -1,4 +1,3 @@
-#pragma once
 #ifndef INC_COM
 #define INC_COM
 

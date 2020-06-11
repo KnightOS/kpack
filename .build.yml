@@ -1,0 +1,16 @@
+image: archlinux
+packages:
+    - cmake
+    - asciidoc
+sources:
+    - https://github.com/KnightOS/kpack
+tasks:
+    - configure: |
+        cd kpack
+        mkdir build
+        cd build
+        cmake ..
+    - build: |
+        cd kpack/build
+        make
+

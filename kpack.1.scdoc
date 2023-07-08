@@ -1,70 +1,60 @@
-/////
-vim:set ts=4 sw=4 tw=82 noet:
-/////
-kpack (1)
-========
+KPACK(1)
 
-Name
-----
+# NAME
+
 kpack - KnightOS cross packaging tool
 
-Synopsis
---------
-'kpack' [options] _package_ _model_
+# SYNOPSIS
 
-Description
------------
+*kpack* [options] _package_ _model_
+
+# DESCRIPTION
 
 Packages (or unpackages) KnightOS package archives from files on disk. You must
 include a package config (_package.config_ by default) which will be read for
 metadata. The _model_ directory is the root of the filesystem the package files
 should be extracted to.
 
-Options
--------
+# OPTIONS
 
-*-e, \--extract*::
+*-e, \--extract*
 	Extracts _package_ to _model_ instead of creating a package from _model_.
 
-*-c, \--config* <config>::
+*-c, \--config* <config>
 	Specifies an alternate config file.
 
-*-i, \--info*::
+*-i, \--info*
 	Instead of packing or unpacking, instead list metadata included in the
 	package.
 
-*-x, \--compressor* <compressor>::
+*-x, \--compressor* <compressor>
 	Specifies the compressor to use. Valid options are "pucrunch", "rle", and
 	"none". The default is pucrunch.
 
-*-s, \--stubs*::
+*-s, \--stubs*
 	Instructs kpack, when extracting packages, to create a package stub for the
 	extracted package. Specifying -s will also instruct kpack to omit the /include
 	directory when extracting the package.
 
-*-k, \--sum* <checksum>::
+*-k, \--sum* <checksum>
 	Specifies a checksum algorithm to use. Valid options are "crc16", "sha1",
 	"md5", and "none". The default is "crc16".
 
-Configuration
--------------
+# CONFIGURATION
 
-See **kpack**(5)
+See *kpack*(5)
 
-Examples
---------
+# EXAMPLES
 
-kpack castle.pkg ./temp::
+*kpack castle.pkg ./temp*
 	Reads metadata from _packages.config_ and packages ./temp into castle.pkg.
 
-Authors
--------
+# AUTHORS
 
 Maintained by Drew DeVault <sir@cmpwn.com>, who is assisted by other open
 source contributors. For more information about kpkg development, see
-<https://github.com/KnightOS/kpkg>.
+https://github.com/KnightOS/kpkg.
 
-See Also
---------
+# SEE ALSO
 
-**kpack**(5)
+*kpack*(5)

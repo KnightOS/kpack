@@ -1,9 +1,0 @@
-#pragma once
-
-#cmakedefine GIT_SHORT_VERSION "@GIT_SHORT_VERSION@"
-#define COPYRIGHT "Copyright (c) " __DATE__ " The KnightOS Group\n"
-#define LICENSE "License MIT/X11\n"
-
-#ifndef GIT_SHORT_VERSION
-#define GIT_SHORT_VERSION "Unknown"
-#endif

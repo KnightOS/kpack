@@ -1,100 +1,98 @@
-/////
-vim:set ts=4 sw=4 tw=82 noet:
-/////
-kpack (5)
-========
+KPACK(5)
 
-Name
-----
+# NAME
+
 kpack - KnightOS package configuration files
 
-Description
------------
+# DESCRIPTION
 
 KnightOS packages contain a lot of useful metadata that identifies authorship
 information, package descriptions, dependencies, and so on.
 
 A simple package.config looks like this:
 
-	[meta]
-	name=packagename
-	repo=community
-	version=1.0.0
+```
+[meta]
+name=packagename
+repo=community
+version=1.0.0
+```
 
 Only these three properties are required, the rest are optional. You may use
 comments by starting a line with #.
 
-**name**::
+*name*
 	The name of the package.
 
-**repo**::
+*repo*
 	The package repository. The following repositories are tracked upstream:
 
-	* _core_: Packages required for system function
-	* _extra_: Extra packages from KnightOS developers
-	* _community_: Packages written by the community at large
-	* _ports_: Software ported from other platforms
-	* _nonfree_: Software distributed under the terms of a license that has not
-	  been approved by the OSI
+	- _core_: Packages required for system function
+	- _extra_: Extra packages from KnightOS developers
+	- _community_: Packages written by the community at large
+	- _ports_: Software ported from other platforms
+	- _nonfree_: Software distributed under the terms of a license that has not
+	  been approved by the FSF
 
 	This only applies to the official KnightOS distribution. If you are running
 	your own distribution, then you are of course free to package software however
 	you please.
 
-**version**::
+*version*
 	The current package version. This _must_ be in the format MAJOR.MINOR.PATCH.
-	See semantic versioning <http://semver.org/> for details.
+	See semantic versioning http://semver.org/ for details.
 
-**description** (optional)::
+*description* (optional)
 	A user-friendly description of this package.
 
-**dependencies** (optional)::
+*dependencies* (optional)
 	A list of packages that this package depends on. These should be fully
-	qualified package names, seperated by spaces. You may optionally incldue a
+	qualified package names, separated by spaces. You may optionally include a
 	minimum required version. Example:
 
 	dependencies=corelib kpm:1.0.0
 
-**capabilities** (optional)::
+*capabilities* (optional)
 	Lists capabilities required of the target device. For example, you might
-	require USB support. Seperate each with spaces. Example:
+	require USB support. Separate each with spaces. Example:
 
+	```
 	capabilities=usb color
+	```
 
 	The following capabilities are formally defined and supported by kpm:
 
-	* _color_: Requires a color display
-	* _usb_: Requires USB support
-	* _clock_: Requires a real-time clock
-	* _extraram_: Requires at least 8 pages of RAM
+	- _color_: Requires a color display
+	- _usb_: Requires USB support
+	- _clock_: Requires a real-time clock
+	- _extraram_: Requires at least 8 pages of RAM
 
-**author** (optional)::
+*author* (optional)
 	The person who originally wrote this software. The suggested format of this
-	field is **Author Name <author email>** (i.e. **Drew DeVault <sir@cmpwn.com>**).
+	field is *Author Name <author email>* (i.e. *Drew DeVault <sir@cmpwn.com>*).
 
-**maintainer** (optional)::
+*maintainer* (optional)
 	The person who maintains this package. This may be different than the author.
 
-**infourl** (optional)::
+*infourl* (optional)
 	A URL at which information about this software may be obtained.
 
-**copyright** (optional)::
+*copyright* (optional)
 	The name of the license or the copyright statement for this package. Optional
 	but strongly suggested. Examples might include:
 
-	* MIT license
-	* Public Domain
-	* GPLv2
-	* Copyright John Doe 2014, All Rights Reserved
+	- MIT license
+	- Public Domain
+	- GPLv2
+	- Copyright John Doe 2014, All Rights Reserved
 
 	You may also wish to include a license file in your package itself with a
-	longer license statement. It's reccommended that you distribute your full
+	longer license statement. It's recommended that you distribute your full
 	license text alongside the package, rather than inside of it, to save valuable
 	space on the installed device.
 
-Authors
--------
+# AUTHORS
 
 Maintained by Drew DeVault <sir@cmpwn.com>, who is assisted by other open
 source contributors. For more information about kpkg development, see
-<https://github.com/KnightOS/kpkg>.
+https://github.com/KnightOS/kpkg.

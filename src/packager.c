@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "checksums.h"
-#include <version.h>
+#include "version.h"
 
 void initRuntime() {
 	packager.config = NULL;

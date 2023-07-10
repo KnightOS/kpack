@@ -1,8 +1,3 @@
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
 *.swp
 *.o
 bin/
@@ -10,5 +5,3 @@ bin/
 temp/
 *.1
 *.5
-src/version.h.gen
-build/

@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "unpack.h"
 #include "common.h"
 #include <stdio.h>
@@ -13,8 +14,7 @@
 #endif
 
 void mkpath(const char *root, const char *_path) {
-	char *path = malloc(strlen(_path));
-	strcpy(path, _path);
+	char *path = strdup(_path);
 	char *slash = path;
 	char backup;
 	char *fullPath;
@@ -92,12 +92,12 @@ void unpack(FILE *file, const char *root, int write_stub) {
 			strlen(repo) +
 			strlen("/var/packages/") +
 			strlen(name) +
-			strlen("-256.256.256.stub"));
+			strlen("-256.256.256.stub") + 1);
 		strcpy(stubdir, "/var/packages/");
 		strcat(stubdir, repo);
 		mkpath(root, stubdir);
 		sprintf(stubdir + strlen(repo) + strlen("/var/packages/"), "/%s-%d.%d.%d.stub", name, major, minor, patch);
-		char *fullpath = malloc(strlen(root) + strlen(stubdir));
+		char *fullpath = malloc(strlen(root) + strlen(stubdir) + 1);
 		strcpy(fullpath, root);
 		strcat(fullpath, stubdir);
 		stub = fopen(fullpath, "wb");

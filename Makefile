@@ -9,15 +9,7 @@ MANPREFIX = $(PREFIX)/share/man
 SRC = src/checksums.c src/main.c src/packager.c src/unpack.c
 OBJ = $(SRC:.c=.o)
 
-all: options kpack
-
-options:
-	@echo kpack build options:
-	@echo "CFLAGS	= $(CFLAGS)"
-	@echo "CC	= $(CC)"
-
-$(OBJ):
-	$(CC) -c -o $@ $(CFLAGS) $(@:.o=.c)
+all: kpack
 
 kpack: $(OBJ)
 	$(CC) -o $@ $(OBJ)
